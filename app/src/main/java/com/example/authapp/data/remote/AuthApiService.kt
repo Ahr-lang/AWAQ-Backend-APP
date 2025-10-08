@@ -1,7 +1,6 @@
 package com.example.authapp.data.remote
 
 import com.example.authapp.data.model.AuthRequest
-import com.example.authapp.data.model.AuthResponse
 import com.example.authapp.data.model.FormRequest
 import com.example.authapp.data.model.ProfileResponse
 import com.example.authapp.data.model.TodoDto
@@ -10,13 +9,40 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.Call
+import retrofit2.http.Path
+
+data class LoginRequest(
+    val user_email: String,
+    val password: String
+)
+
+data class LoginResponse(
+    val message: String,
+    val token: String,
+    val token_type: String,
+    val expires_in: String,
+    val user: UserData
+)
+
+data class UserData(
+    val id: Int,
+    val username: String,
+    val user_email: String,
+    val lastAccess: String,
+    val lastLogin: String,
+    val tenant: String
+)
 
 interface AuthApiService {
     @POST("api/auth/signup")
     suspend fun signUp(@Body request: AuthRequest): Response<Unit>
 
-    @POST("api/auth/signin")
-    suspend fun signIn(@Body request: AuthRequest): Response<AuthResponse>
+    @POST("api/{tenant}/users/login")
+    fun login(
+        @Path("back") tenant: String,
+        @Body request: LoginRequest
+    ): Call<LoginResponse>
 
     @GET("api/profile")
     suspend fun getProfile(): Response<ProfileResponse>
@@ -31,3 +57,4 @@ interface AuthApiService {
     suspend fun getUsers(): Response<List<User>>
 
 }
+

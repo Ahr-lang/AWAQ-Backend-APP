@@ -8,13 +8,11 @@ import okhttp3.Response
 
 class AuthInterceptor(private val tokenManager: TokenManager) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token = runBlocking {
-            tokenManager.token.first()
+        val token = runBlocking { tokenManager.token.first() } // obtiene el JWT guardado
+        val newRequest = chain.request().newBuilder()
+        if (!token.isNullOrEmpty()) {
+            newRequest.addHeader("Authorization", "Bearer $token")
         }
-        val request = chain.request().newBuilder()
-        if (token != null) {
-            request.addHeader("Authorization", token)
-        }
-        return chain.proceed(request.build())
+        return chain.proceed(newRequest.build())
     }
 }

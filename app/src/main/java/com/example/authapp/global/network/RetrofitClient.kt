@@ -8,7 +8,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "localhost:3000/" // cámbialo por el real cuando ya funcione fuera de local
+    private const val BASE_URL = "http://10.0.2.2:3000/" //agregartodo el link
 
     fun create(tokenManager: TokenManager): AuthApiService {
         val loggingInterceptor = HttpLoggingInterceptor().apply {

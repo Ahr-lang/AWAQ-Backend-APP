@@ -5,19 +5,20 @@ import com.example.authapp.data.model.AuthRequest
 import com.example.authapp.data.model.FormRequest
 import com.example.authapp.data.model.TodoDto
 import com.example.authapp.data.remote.AuthApiService
+import com.example.authapp.data.remote.LoginRequest
 import kotlinx.coroutines.flow.Flow
 
 class AuthRepository(
     private val apiService: AuthApiService,
     private val tokenManager: TokenManager
 ) {
-    suspend fun signIn(email: String, password: String) {
-        val response = apiService.signIn(AuthRequest(email, password))
+    suspend fun signIn(email: String, password: String, tenant: String = "agromo") {
+        val response = apiService.login(tenant, LoginRequest(email, password)).execute()
         if (response.isSuccessful && response.body() != null) {
             val token = response.body()!!.token
             tokenManager.saveToken(token)
         } else {
-            throw Exception("Credenciales inválidas o error del servidor.")
+            throw Exception("Error al iniciar sesión: ${response.errorBody()?.string()}")
         }
     }
     suspend fun signUp(email: String, password: String) {
