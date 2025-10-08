@@ -43,11 +43,11 @@ class AuthViewModel(
     }
 
     // Y agrega la función de registro en la clase AuthViewModel
-    fun register(username: String, email: String, password: String, tenant: String) {
+    fun register(username: String, email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             try {
-                authRepository.register(username, email, password, tenant)
+                authRepository.register(username, email, password)
                 _authState.value = AuthState.SignUpSuccess
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Error de registro")

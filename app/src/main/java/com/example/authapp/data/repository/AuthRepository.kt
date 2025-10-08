@@ -22,13 +22,13 @@ class AuthRepository(
         }
     }
 
-    suspend fun register(username: String, email: String, password: String, tenant: String) {
+    suspend fun register(username: String, email: String, password: String) {
         val request = RegisterRequest(
             username = username,
             user_email = email,
             password = password
         )
-        val response = apiService.register(tenant, request)
+        val response = apiService.register(request) // solo 1 parámetro
         if (!response.isSuccessful || response.body() == null) {
             throw Exception("Registro fallido: ${response.message()}")
         }
