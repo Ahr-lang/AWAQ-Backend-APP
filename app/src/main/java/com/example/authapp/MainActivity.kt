@@ -122,7 +122,7 @@ fun AppNavigation(startDestination: String, authViewModel: AuthViewModel, formVi
                     }
                 }
             }
-            HomeScreen(onLogout = { authViewModel.signOut() }, onNavigateToForm = { navController.navigate("form")}, onNavigateToCamera = { navController.navigate("camera") },todoViewModel = todoViewModel)
+            HomeScreen(onLogout = { authViewModel.signOut() }, onNavigateToForm = { navController.navigate("form")},todoViewModel = todoViewModel)
         }
     }
 }

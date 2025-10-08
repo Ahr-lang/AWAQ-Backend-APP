@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,7 +26,6 @@ import com.example.authapp.ui.theme.Black
 fun HomeScreen(
     onLogout: () -> Unit,
     onNavigateToForm: () -> Unit,
-    onNavigateToCamera: () -> Unit,
     todoViewModel: TodoViewModel
 ) {
     val todoListState by todoViewModel.todoListState.collectAsState()
@@ -74,21 +74,6 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        OutlinedButton(
-            onClick = onNavigateToCamera,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = AwaqGreen
-            ),
-            border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp, brush = androidx.compose.ui.graphics.Brush.linearGradient(listOf(AwaqGreen, AwaqGreen)))
-        ) {
-            Text("Abrir Cámara", fontWeight = FontWeight.Medium)
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
         TextButton(onClick = onLogout) {
             Text(
                 "Cerrar Sesión",
@@ -99,7 +84,7 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Divider(thickness = 1.dp, color = Color.LightGray)
+        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
         Spacer(modifier = Modifier.height(16.dp))
 
         // --- Lista de tareas ---
