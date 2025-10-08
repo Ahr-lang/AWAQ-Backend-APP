@@ -45,9 +45,8 @@ interface AuthApiService {
         @Body registerRequest: RegisterRequest
     ): Response<UserData>
 
-    @POST("api/{tenant}/users/login")
+    @POST("api/back/users/login")
     fun login(
-        @Path("back") tenant: String,
         @Body request: LoginRequest
     ): Call<LoginResponse>
 

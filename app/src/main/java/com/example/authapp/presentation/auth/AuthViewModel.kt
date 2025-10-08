@@ -36,6 +36,7 @@ class AuthViewModel(
             _authState.value = AuthState.Loading
             try {
                 loginUseCase(email, password)
+                _authState.value = AuthState.Authenticated
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Error de red")
             }

@@ -12,8 +12,8 @@ class AuthRepository(
     private val apiService: AuthApiService,
     private val tokenManager: TokenManager
 ) {
-    suspend fun signIn(email: String, password: String, tenant: String = "agromo") {
-        val response = apiService.login(tenant, LoginRequest(email, password)).execute()
+    suspend fun signIn(email: String, password: String) {
+        val response = apiService.login(LoginRequest(email, password)).execute()
         if (response.isSuccessful && response.body() != null) {
             val token = response.body()!!.token
             tokenManager.saveToken(token)
