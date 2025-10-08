@@ -46,9 +46,9 @@ interface AuthApiService {
     ): Response<UserData>
 
     @POST("api/back/users/login")
-    fun login(
+    suspend fun login(
         @Body request: LoginRequest
-    ): Call<LoginResponse>
+    ): LoginResponse
 
     @GET("api/profile")
     suspend fun getProfile(): Response<ProfileResponse>

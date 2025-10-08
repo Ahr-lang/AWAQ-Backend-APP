@@ -13,12 +13,16 @@ class AuthRepository(
     private val tokenManager: TokenManager
 ) {
     suspend fun signIn(email: String, password: String) {
-        val response = apiService.login(LoginRequest(email, password)).execute()
-        if (response.isSuccessful && response.body() != null) {
-            val token = response.body()!!.token
-            tokenManager.saveToken(token)
-        } else {
-            throw Exception("Error al iniciar sesión: ${response.errorBody()?.string()}")
+        try {
+            // Llamada suspend a Retrofit
+            val response = apiService.login(LoginRequest(email, password))
+
+            // Guardamos el token usando TokenManager
+            tokenManager.saveToken(response.token)
+
+        } catch (e: Exception) {
+            // Lanza la excepción para que la capa de presentación la maneje
+            throw Exception("Error al iniciar sesión: ${e.message}")
         }
     }
 
