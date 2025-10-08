@@ -26,10 +26,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.authapp.R
-import com.example.authapp.presentation.auth.AuthState
-import com.example.authapp.presentation.auth.AuthViewModel
 import com.example.authapp.ui.theme.AwaqGreen
-import com.example.authapp.ui.theme.Black
 import com.example.authapp.ui.theme.White
 
 @Composable
@@ -115,7 +112,7 @@ fun SignUpScreen(
             CircularProgressIndicator(color = AwaqGreen)
         } else {
             Button(
-                onClick = { authViewModel.register(email, email, password, "back") },
+                onClick = { authViewModel.register(email, email, password) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
