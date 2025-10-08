@@ -1,105 +1,156 @@
 package com.example.authapp.presentation.home
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.authapp.data.model.TodoDto
+import com.example.authapp.ui.theme.AwaqGreen
+import com.example.authapp.ui.theme.White
+import com.example.authapp.ui.theme.Black
 
 @Composable
 fun HomeScreen(
-    onLogout: () -> Unit ,
+    onLogout: () -> Unit,
     onNavigateToForm: () -> Unit,
     onNavigateToCamera: () -> Unit,
     todoViewModel: TodoViewModel
 ) {
     val todoListState by todoViewModel.todoListState.collectAsState()
-    LaunchedEffect(key1 = Unit) { // O key1 = authState si depende de eso
+
+    LaunchedEffect(Unit) {
         todoViewModel.loadTodos()
     }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+            .background(White)
+            .padding(horizontal = 20.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "¡Bienvenido a la pantalla de inicio!")
-        Button(onClick = onNavigateToForm) { // Botón para ir al formulario
-            Text("Ir al formulario")
-        }
+        // --- Encabezado ---
+        Text(
+            text = "Bienvenido a AWAQ 🌿",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = AwaqGreen
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Gestiona tus tareas y recursos aquí",
+            fontSize = 16.sp,
+            color = Color.Gray
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- Botones principales ---
         Button(
-            onClick = onNavigateToCamera, // <--- LLAMA AL NUEVO CALLBACK
-            modifier = Modifier.padding(top = 8.dp) // Espaciado
+            onClick = onNavigateToForm,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AwaqGreen,
+                contentColor = White
+            ),
+            shape = MaterialTheme.shapes.medium
         ) {
-            Text("Tomar Foto (Cámara)")
+            Text("Ir al Formulario", fontWeight = FontWeight.SemiBold)
         }
-        Button(
-            onClick = onLogout,
-            modifier = Modifier.padding(top = 16.dp)
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        OutlinedButton(
+            onClick = onNavigateToCamera,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = AwaqGreen
+            ),
+            border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp, brush = androidx.compose.ui.graphics.Brush.linearGradient(listOf(AwaqGreen, AwaqGreen)))
         ) {
-            Text(text = "Cerrar Sesión")
+            Text("Abrir Cámara", fontWeight = FontWeight.Medium)
         }
-        // Mostrar lista de tareas, cargador o error
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        TextButton(onClick = onLogout) {
+            Text(
+                "Cerrar Sesión",
+                color = Color.Red,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Divider(thickness = 1.dp, color = Color.LightGray)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- Lista de tareas ---
         when (val state = todoListState) {
             is TodoListState.Loading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = AwaqGreen)
                 }
             }
+
             is TodoListState.Success -> {
                 if (state.todos.isEmpty()) {
-                    Text("No tienes tareas pendientes. ¡Añade una!")
+                    Text(
+                        text = "No tienes tareas pendientes 🌱",
+                        color = Color.Gray,
+                        fontSize = 16.sp
+                    )
                 } else {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    ) {
                         items(state.todos, key = { it.id }) { todo ->
                             TodoListItem(
                                 todo = todo,
-                                onToggleComplete = {  },
-                                onDelete = {  }
+                                onToggleComplete = { /* lógica de check */ },
+                                onDelete = { /* lógica delete */ }
                             )
-
                         }
                     }
                 }
             }
+
             is TodoListState.Error -> {
-                Text("Error: ${state.message}", color = MaterialTheme.colorScheme.error)
-                Button(onClick = { todoViewModel.loadTodos() }) {
-                    Text("Reintentar")
+                Text(
+                    text = "Error: ${state.message}",
+                    color = MaterialTheme.colorScheme.error
+                )
+                Button(
+                    onClick = { todoViewModel.loadTodos() },
+                    colors = ButtonDefaults.buttonColors(containerColor = AwaqGreen)
+                ) {
+                    Text("Reintentar", color = White)
                 }
             }
-            is TodoListState.Idle -> {
-                // Puede ser el estado inicial antes de que se active el LaunchedEffect
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    // Text("Cargando tareas...")
-                }
-            }
+
+            else -> {}
         }
     }
 }
@@ -113,21 +164,39 @@ fun TodoListItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 6.dp)
+            .background(Color(0xFFF8F8F8), shape = MaterialTheme.shapes.medium)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Checkbox(
-            checked = todo.isCompleted,
-            onCheckedChange = { onToggleComplete() }
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = todo.task,
-            modifier = Modifier.weight(1f),
-            style = if (todo.isCompleted) TextStyle(textDecoration = TextDecoration.LineThrough) else TextStyle.Default
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = todo.isCompleted,
+                onCheckedChange = { onToggleComplete() },
+                colors = CheckboxDefaults.colors(
+                    checkedColor = AwaqGreen,
+                    uncheckedColor = Color.Gray
+                )
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = todo.task,
+                style = if (todo.isCompleted)
+                    TextStyle(
+                        textDecoration = TextDecoration.LineThrough,
+                        color = Color.Gray
+                    )
+                else TextStyle(color = Black, fontWeight = FontWeight.Medium)
+            )
+        }
+
         IconButton(onClick = onDelete) {
-            Icon(Icons.Filled.Delete, contentDescription = "Eliminar tarea", tint = MaterialTheme.colorScheme.error)
+            Icon(
+                imageVector = Icons.Filled.Delete,
+                contentDescription = "Eliminar tarea",
+                tint = Color(0xFFD32F2F)
+            )
         }
     }
 }
