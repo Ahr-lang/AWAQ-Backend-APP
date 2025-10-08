@@ -1,9 +1,7 @@
 package com.example.authapp
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -30,11 +28,8 @@ import com.example.authapp.presentation.home.HomeScreen
 import com.example.authapp.presentation.auth.LoginScreen
 import com.example.authapp.ui.theme.AuthAppTheme
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
 import com.example.authapp.domains.usecase.GetTodosUseCase
 import com.example.authapp.domains.usecase.SubmitFormUseCase
-import com.example.authapp.presentation.components.CameraXCaptureScreen
 import com.example.authapp.presentation.form.FormScreen
 import com.example.authapp.presentation.form.FormViewModel
 import com.example.authapp.presentation.form.FormViewModelFactory
@@ -128,29 +123,6 @@ fun AppNavigation(startDestination: String, authViewModel: AuthViewModel, formVi
                 }
             }
             HomeScreen(onLogout = { authViewModel.signOut() }, onNavigateToForm = { navController.navigate("form")}, onNavigateToCamera = { navController.navigate("camera") },todoViewModel = todoViewModel)
-        }
-        composable("camera") {
-            // Necesitas el contexto para acceder al Main Executor
-            val context = LocalContext.current
-
-            CameraXCaptureScreen(
-                onImageCaptured = { uri: Uri ->
-                    Log.d("NAV", "Imagen capturada: $uri")
-
-                    // CORRECCIÓN CLAVE: Ejecutar la navegación en el Hilo Principal
-                    ContextCompat.getMainExecutor(context).execute {
-                        navController.popBackStack()
-                    }
-                },
-                onError = { message: String ->
-                    Log.e("NAV", "Error de cámara: $message")
-
-                    // CORRECCIÓN CLAVE: Ejecutar la navegación en el Hilo Principal
-                    ContextCompat.getMainExecutor(context).execute {
-                        navController.popBackStack()
-                    }
-                }
-            )
         }
     }
 }
