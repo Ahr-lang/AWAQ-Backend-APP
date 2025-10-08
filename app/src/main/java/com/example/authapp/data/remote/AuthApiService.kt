@@ -40,9 +40,8 @@ data class RegisterRequest(
 )
 
 interface AuthApiService {
-    @POST("/api/{tenant}/users/register")
+    @POST("/api/back/users/register")
     suspend fun register(
-        @Path("back") tenant: String,
         @Body registerRequest: RegisterRequest
     ): Response<UserData>
 
