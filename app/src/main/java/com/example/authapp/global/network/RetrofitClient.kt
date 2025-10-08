@@ -16,7 +16,14 @@ object RetrofitClient {
         }
 
         val client = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(tokenManager))
+            .addInterceptor { chain ->
+                val original = chain.request()
+                val requestBuilder = original.newBuilder()
+                    .header("apikey", "back-key-000") //
+                    .method(original.method, original.body)
+                val request = requestBuilder.build()
+                chain.proceed(request)
+            }
             .addInterceptor(loggingInterceptor)
             .build()
 
