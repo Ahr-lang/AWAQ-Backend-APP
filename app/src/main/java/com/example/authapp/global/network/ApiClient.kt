@@ -5,7 +5,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
-    private const val BASE_URL = "http://10.0.2.2:3000/" // cámbialo por el real cuando ya funcione fuera de local
+    private const val BASE_URL = "http://10.0.2.2:3000/" // quitar localhost
 
     val apiService: AuthApiService by lazy {
         Retrofit.Builder()

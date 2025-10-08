@@ -2,8 +2,6 @@ package com.example.authapp.presentation.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -86,57 +84,6 @@ fun HomeScreen(
 
         HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
         Spacer(modifier = Modifier.height(16.dp))
-
-        // --- Lista de tareas ---
-        when (val state = todoListState) {
-            is TodoListState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = AwaqGreen)
-                }
-            }
-
-            is TodoListState.Success -> {
-                if (state.todos.isEmpty()) {
-                    Text(
-                        text = "No tienes tareas pendientes 🌱",
-                        color = Color.Gray,
-                        fontSize = 16.sp
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp)
-                    ) {
-                        items(state.todos, key = { it.id }) { todo ->
-                            TodoListItem(
-                                todo = todo,
-                                onToggleComplete = { /* lógica de check */ },
-                                onDelete = { /* lógica delete */ }
-                            )
-                        }
-                    }
-                }
-            }
-
-            is TodoListState.Error -> {
-                Text(
-                    text = "Error: ${state.message}",
-                    color = MaterialTheme.colorScheme.error
-                )
-                Button(
-                    onClick = { todoViewModel.loadTodos() },
-                    colors = ButtonDefaults.buttonColors(containerColor = AwaqGreen)
-                ) {
-                    Text("Reintentar", color = White)
-                }
-            }
-
-            else -> {}
-        }
     }
 }
 
