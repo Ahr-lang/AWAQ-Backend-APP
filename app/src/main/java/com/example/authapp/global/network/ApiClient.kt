@@ -5,7 +5,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
-    private const val BASE_URL = "https://tu-api.awaq.com/" // cámbialo por el real
+    private const val BASE_URL = "localhost:3000/" // cámbialo por el real cuando ya funcione fuera de local
 
     val apiService: AuthApiService by lazy {
         Retrofit.Builder()
