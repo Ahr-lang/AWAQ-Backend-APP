@@ -115,7 +115,7 @@ fun SignUpScreen(
             CircularProgressIndicator(color = AwaqGreen)
         } else {
             Button(
-                onClick = { authViewModel.signUp(email, password) },
+                onClick = { authViewModel.register(email, email, password, "back") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),

@@ -19,3 +19,9 @@ data class User(
     val id: Int,
     val email: String
 )
+
+data class RegisterRequest(
+    val username: String,
+    val password: String,
+    val user_email: String
+)

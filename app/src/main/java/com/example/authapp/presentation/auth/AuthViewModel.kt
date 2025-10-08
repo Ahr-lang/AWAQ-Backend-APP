@@ -2,6 +2,7 @@ package com.example.authapp.presentation.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.authapp.data.repository.AuthRepository
 import com.example.authapp.domains.usecase.GetAuthStateUseCase
 import com.example.authapp.domains.usecase.LoginUseCase
 import com.example.authapp.domains.usecase.LogoutUseCase
@@ -15,7 +16,8 @@ class AuthViewModel(
     private val loginUseCase: LoginUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val getAuthStateUseCase: GetAuthStateUseCase,
-    private val signUpUseCase: SignUpUseCase
+    private val signUpUseCase: SignUpUseCase,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.InitialLoading)
@@ -41,11 +43,11 @@ class AuthViewModel(
     }
 
     // Y agrega la función de registro en la clase AuthViewModel
-    fun signUp(email: String, password: String) {
+    fun register(username: String, email: String, password: String, tenant: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             try {
-                signUpUseCase(email, password)
+                authRepository.register(username, email, password, tenant)
                 _authState.value = AuthState.SignUpSuccess
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Error de registro")

@@ -1,8 +1,8 @@
 package com.example.authapp.data.repository
 
 import com.example.authapp.global.util.TokenManager
-import com.example.authapp.data.model.AuthRequest
 import com.example.authapp.data.model.FormRequest
+import com.example.authapp.data.remote.RegisterRequest
 import com.example.authapp.data.model.TodoDto
 import com.example.authapp.data.remote.AuthApiService
 import com.example.authapp.data.remote.LoginRequest
@@ -21,14 +21,18 @@ class AuthRepository(
             throw Exception("Error al iniciar sesión: ${response.errorBody()?.string()}")
         }
     }
-    suspend fun signUp(email: String, password: String) {
-        val response = apiService.signUp(AuthRequest(email, password))
-        if (!response.isSuccessful) {
-            // Maneja el error, por ejemplo, si el usuario ya existe
-            throw Exception("El registro falló: ${response.message()}")
+
+    suspend fun register(username: String, email: String, password: String, tenant: String) {
+        val request = RegisterRequest(
+            username = username,
+            user_email = email,
+            password = password
+        )
+        val response = apiService.register(tenant, request)
+        if (!response.isSuccessful || response.body() == null) {
+            throw Exception("Registro fallido: ${response.message()}")
         }
     }
-
     suspend fun signOut() {
         tokenManager.deleteToken()
     }

@@ -1,6 +1,5 @@
 package com.example.authapp.data.remote
 
-import com.example.authapp.data.model.AuthRequest
 import com.example.authapp.data.model.FormRequest
 import com.example.authapp.data.model.ProfileResponse
 import com.example.authapp.data.model.TodoDto
@@ -34,9 +33,18 @@ data class UserData(
     val tenant: String
 )
 
+data class RegisterRequest(
+    val username: String,
+    val user_email: String,
+    val password: String
+)
+
 interface AuthApiService {
-    @POST("api/auth/signup")
-    suspend fun signUp(@Body request: AuthRequest): Response<Unit>
+    @POST("/api/{tenant}/users/register")
+    suspend fun register(
+        @Path("back") tenant: String,
+        @Body registerRequest: RegisterRequest
+    ): Response<UserData>
 
     @POST("api/{tenant}/users/login")
     fun login(
@@ -57,4 +65,3 @@ interface AuthApiService {
     suspend fun getUsers(): Response<List<User>>
 
 }
-

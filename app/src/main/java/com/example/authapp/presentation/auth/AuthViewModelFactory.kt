@@ -19,7 +19,13 @@ class AuthViewModelFactory(
             val getAuthStateUseCase = GetAuthStateUseCase(authRepository)
             val signUpUseCase = SignUpUseCase(authRepository)
             @Suppress("UNCHECKED_CAST")
-            return AuthViewModel(loginUseCase, logoutUseCase, getAuthStateUseCase, signUpUseCase) as T
+            return AuthViewModel(
+                loginUseCase,
+                logoutUseCase,
+                getAuthStateUseCase,
+                signUpUseCase,
+                authRepository // <--- agregado para register
+            ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
