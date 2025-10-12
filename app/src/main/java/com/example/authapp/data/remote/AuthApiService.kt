@@ -8,8 +8,6 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.Call
-import retrofit2.http.Path
 
 data class LoginRequest(
     val user_email: String,
