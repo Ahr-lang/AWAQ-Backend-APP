@@ -12,9 +12,11 @@ import androidx.navigation.navArgument
 import androidx.core.net.toUri
 
 import com.example.authapp.presentation.mainViews.HomeScreen
+import com.example.authapp.presentation.users.UsersScreen
 
 object Routes {
-    const val HOME = "mainScreen"
+    const val HOME = "HomeScreen"
+    const val USER = "UsersScreen"
 }
 
 @Composable
@@ -26,6 +28,18 @@ fun AppNav( // en instacam era viewModel: GalleryViewModel
         navController = navController,
         startDestination = Routes.HOME
     ) {
+        // CHECAR ESTA SECCION, NO ESTOY SEGURO COMO IMPLEMENTAR BIEN
+//        composable(Routes.HOME) {
+//            HomeScreen(
+//                onLogout,
+//            onNavigateToForm:
+//            )
+//        }
 
+        composable(Routes.USER) {
+            UsersScreen(
+                onClose = { navController.popBackStack() }
+            )
+        }
     }
 }

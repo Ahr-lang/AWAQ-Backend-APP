@@ -16,6 +16,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun UsersScreen(
+    onClose: () -> Unit,
     viewModel: UsersViewModel = viewModel(factory = UsersViewModelFactory())
 ) {
     val usersByApp by viewModel.usersByApp.observeAsState(emptyMap())
