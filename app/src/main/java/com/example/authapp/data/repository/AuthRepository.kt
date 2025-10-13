@@ -14,14 +14,9 @@ class AuthRepository(
 ) {
     suspend fun signIn(email: String, password: String) {
         try {
-            // Llamada suspend a Retrofit
             val response = apiService.login(LoginRequest(email, password))
-
-            // Guardamos el token usando TokenManager
             tokenManager.saveToken(response.token)
-
         } catch (e: Exception) {
-            // Lanza la excepción para que la capa de presentación la maneje
             throw Exception("Error al iniciar sesión: ${e.message}")
         }
     }
@@ -32,11 +27,25 @@ class AuthRepository(
             user_email = email,
             password = password
         )
-        val response = apiService.register(request) // solo 1 parámetro
+        val response = apiService.register(request)
         if (!response.isSuccessful || response.body() == null) {
             throw Exception("Registro fallido: ${response.message()}")
         }
     }
+
+    // AGREGUE ESTA REGISTERWITHTENANT solo es usarla de alguna manera
+    suspend fun registerWithTenant(username: String, email: String, password: String, tenant: String) {
+        val request = RegisterRequest(
+            username = username,
+            user_email = email,
+            password = password
+        )
+        val response = apiService.register(tenant, request)
+        if (!response.isSuccessful || response.body() == null) {
+            throw Exception("Registro fallido (${tenant}): ${response.message()}")
+        }
+    }
+
     suspend fun signOut() {
         tokenManager.deleteToken()
     }

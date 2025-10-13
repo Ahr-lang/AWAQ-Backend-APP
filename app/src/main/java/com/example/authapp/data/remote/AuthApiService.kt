@@ -8,6 +8,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 data class LoginRequest(
     val user_email: String,
@@ -37,6 +38,12 @@ data class RegisterRequest(
     val password: String
 )
 
+// AGREGUE ESTO
+data class RegisterResponse(
+    val message: String,
+    val user_id: String? = null
+)
+
 interface AuthApiService {
     @POST("/api/back/users/register")
     suspend fun register(
@@ -47,6 +54,14 @@ interface AuthApiService {
     suspend fun login(
         @Body request: LoginRequest
     ): LoginResponse
+
+    //AGREGUE ESTO PROLLY CAMBIAR LO DE {TENANT}
+    @POST("api/auth/register/{tenant}")
+    suspend fun register(
+        @Path("tenant") tenant: String,
+        @Body request: RegisterRequest
+    ): Response<RegisterResponse> //VER QUE DEVUELVE LA API PARA DEFINIRLO LUEGO
+
 
     @GET("api/profile")
     suspend fun getProfile(): Response<ProfileResponse>
