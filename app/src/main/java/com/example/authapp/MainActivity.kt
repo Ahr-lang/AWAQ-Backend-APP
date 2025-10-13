@@ -24,18 +24,18 @@ import com.example.authapp.global.network.RetrofitClient
 import com.example.authapp.presentation.auth.AuthState
 import com.example.authapp.presentation.auth.AuthViewModel
 import com.example.authapp.presentation.auth.AuthViewModelFactory
-import com.example.authapp.presentation.home.HomeScreen
+import com.example.authapp.presentation.mainViews.HomeScreen
 import com.example.authapp.presentation.auth.LoginScreen
 import com.example.authapp.ui.theme.AuthAppTheme
 import androidx.compose.runtime.getValue
 import com.example.authapp.domains.usecase.GetTodosUseCase
 import com.example.authapp.domains.usecase.SubmitFormUseCase
-import com.example.authapp.presentation.form.FormScreen
-import com.example.authapp.presentation.form.FormViewModel
-import com.example.authapp.presentation.form.FormViewModelFactory
+import com.example.authapp.presentation.componentes.borrardespues.FormScreen
+import com.example.authapp.presentation.componentes.borrardespues.FormViewModel
+import com.example.authapp.presentation.componentes.borrardespues.FormViewModelFactory
 import com.example.authapp.presentation.auth.SignUpScreen
-import com.example.authapp.presentation.home.TodoViewModel
-import com.example.authapp.presentation.home.TodoViewModelFactory
+import com.example.authapp.presentation.mainViews.borrardespues.TodoViewModel
+import com.example.authapp.presentation.mainViews.borrardespues.TodoViewModelFactory
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")

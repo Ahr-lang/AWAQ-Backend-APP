@@ -1,4 +1,4 @@
-package com.example.authapp.presentation.form
+package com.example.authapp.presentation.componentes.borrardespues
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -21,7 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.authapp.R
-import com.example.authapp.presentation.form.FormViewModel
 import com.example.authapp.ui.theme.AwaqGreen
 import com.example.authapp.ui.theme.Black
 import com.example.authapp.ui.theme.White
@@ -91,7 +91,7 @@ fun FormScreen(
                 containerColor = AwaqGreen,
                 contentColor = White
             ),
-            shape = androidx.compose.material3.MaterialTheme.shapes.medium
+            shape = MaterialTheme.shapes.medium
         ) {
             Text("Enviar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
@@ -108,7 +108,7 @@ fun FormScreen(
                 containerColor = Color.LightGray,
                 contentColor = Black
             ),
-            shape = androidx.compose.material3.MaterialTheme.shapes.medium
+            shape = MaterialTheme.shapes.medium
         ) {
             Text("Regresar a Home", fontSize = 16.sp, fontWeight = FontWeight.Medium)
         }

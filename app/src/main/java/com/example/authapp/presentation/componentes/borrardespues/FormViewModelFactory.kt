@@ -1,4 +1,4 @@
-package com.example.authapp.presentation.form
+package com.example.authapp.presentation.componentes.borrardespues
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
