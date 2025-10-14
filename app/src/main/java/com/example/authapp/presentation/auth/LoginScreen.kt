@@ -27,18 +27,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.authapp.R
 import com.example.authapp.ui.theme.AwaqGreen
-import com.example.authapp.ui.theme.Black
 import com.example.authapp.ui.theme.White
 
 @Composable
 fun LoginScreen(
     authViewModel: AuthViewModel,
-    onNavigateToSignUp: () -> Unit
+    onNavigateToSignUp: () -> Unit,
+    onLoginSuccess: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     val authState by authViewModel.authState.collectAsState()
+    if (authState is AuthState.Authenticated) {
+        LaunchedEffect(Unit) {
+            onLoginSuccess()
+        }
+    }
 
     Column(
         modifier = Modifier

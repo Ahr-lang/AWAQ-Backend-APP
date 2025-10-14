@@ -33,7 +33,7 @@ fun StatusScreen(
                 UserCard(
                     title = "Usuarios Agromo",
                     users = agromoUsers.map { it.username },
-                    onAddClick = { /* abrir diálogo o pantalla agregar */ },
+                    onAddClick = { /* pantalla agregar */ },
                     onDeleteClick = { username ->
                         statusViewModel.deleteUser("agromo", username)
                     }

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.authapp.presentation.auth.LoginScreen
+import com.example.authapp.presentation.auth.SignUpScreen
 
 @Composable
 fun AppNav() {
@@ -13,13 +15,22 @@ fun AppNav() {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.STATUS //
+        startDestination = "login" // primera pantalla
     ) {
-        composable(Routes.APPS) {
-            AppsScreen(
-                statusViewModel = statusViewModel,
-                onGoToStatus = { navController.navigate(Routes.STATUS) },
-                onGoToUsers = { navController.navigate(Routes.USERS) }
+        composable("login") {
+            LoginScreen(
+                authViewModel = viewModel(),
+                onNavigateToSignUp = { navController.navigate("signup") },
+                onLoginSuccess = { navController.navigate(Routes.STATUS) {
+                    popUpTo("login") { inclusive = true }
+                } }
+            )
+        }
+
+        composable("signup") {
+            SignUpScreen(
+                authViewModel = viewModel(),
+                onNavigateToLogin = { navController.navigate("login") }
             )
         }
 
@@ -27,6 +38,14 @@ fun AppNav() {
             StatusScreen(
                 statusViewModel = statusViewModel,
                 onGoToApps = { navController.navigate(Routes.APPS) },
+                onGoToUsers = { navController.navigate(Routes.USERS) }
+            )
+        }
+
+        composable(Routes.APPS) {
+            AppsScreen(
+                statusViewModel = statusViewModel,
+                onGoToStatus = { navController.navigate(Routes.STATUS) },
                 onGoToUsers = { navController.navigate(Routes.USERS) }
             )
         }
@@ -40,3 +59,4 @@ fun AppNav() {
         }
     }
 }
+
