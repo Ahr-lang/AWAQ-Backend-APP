@@ -15,8 +15,8 @@ import com.example.authapp.presentation.mainViews.HomeScreen
 import com.example.authapp.presentation.users.UsersScreen
 
 object Routes {
-    const val HOME = "HomeScreen"
-    const val USER = "UsersScreen"
+    // const val HOME = "HomeScreen"
+    const val USER = "VistaUsuarios"
 }
 
 @Composable
@@ -26,7 +26,7 @@ fun AppNav( // en instacam era viewModel: GalleryViewModel
 
     NavHost(
         navController = navController,
-        startDestination = Routes.HOME
+        startDestination = Routes.USER
     ) {
         // CHECAR ESTA SECCION, NO ESTOY SEGURO COMO IMPLEMENTAR BIEN
 //        composable(Routes.HOME) {
