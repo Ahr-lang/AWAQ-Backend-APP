@@ -6,6 +6,7 @@ import com.example.authapp.data.model.TodoDto
 import com.example.authapp.presentation.users.User
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -62,6 +63,17 @@ interface AuthApiService {
         @Body request: RegisterRequest
     ): Response<RegisterResponse> //VER QUE DEVUELVE LA API PARA DEFINIRLO LUEGO
 
+    // AGREGUE ESTO AGUAS CON ESTO
+    @GET("api/{tenant}/users")
+    suspend fun getUsersByTenant(
+        @Path("tenant") tenant: String
+    ): Response<List<UserData>>
+    // ESTO TMB AGUAS CON ESTO
+    @DELETE("api/{tenant}/users/{email}")
+    suspend fun deleteUser(
+        @Path("tenant") tenant: String,
+        @Path("email") email: String
+    ): Response<Unit>
 
     @GET("api/profile")
     suspend fun getProfile(): Response<ProfileResponse>
