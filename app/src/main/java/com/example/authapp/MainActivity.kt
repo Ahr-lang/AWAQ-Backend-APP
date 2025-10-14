@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
                             CircularProgressIndicator()
                         }
                     } else {
-                        AppNav() // <-- tu nueva navegación como root
+                        AppNav(repository = authRepository)
                     }
                 }
             }

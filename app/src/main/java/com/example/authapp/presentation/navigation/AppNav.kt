@@ -5,25 +5,30 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.authapp.data.repository.AuthRepository
 import com.example.authapp.presentation.auth.LoginScreen
 import com.example.authapp.presentation.auth.SignUpScreen
 
 @Composable
-fun AppNav() {
+fun AppNav(repository: AuthRepository) {
     val navController = rememberNavController()
-    val statusViewModel: StatusViewModel = viewModel()
+    val statusViewModel: StatusViewModel = viewModel(
+        factory = StatusViewModelFactory(repository)
+    )
 
     NavHost(
         navController = navController,
-        startDestination = "login" // primera pantalla
+        startDestination = "login" // pantalla inicial
     ) {
         composable("login") {
             LoginScreen(
                 authViewModel = viewModel(),
                 onNavigateToSignUp = { navController.navigate("signup") },
-                onLoginSuccess = { navController.navigate(Routes.STATUS) {
-                    popUpTo("login") { inclusive = true }
-                } }
+                onLoginSuccess = {
+                    navController.navigate(Routes.STATUS) {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
             )
         }
 
@@ -59,4 +64,3 @@ fun AppNav() {
         }
     }
 }
-
