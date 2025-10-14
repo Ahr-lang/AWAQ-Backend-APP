@@ -7,6 +7,7 @@ import com.example.authapp.data.model.TodoDto
 import com.example.authapp.data.remote.AuthApiService
 import com.example.authapp.data.remote.LoginRequest
 import kotlinx.coroutines.flow.Flow
+import com.example.authapp.data.model.UserData
 
 class AuthRepository(
     private val apiService: AuthApiService,
@@ -43,6 +44,21 @@ class AuthRepository(
         val response = apiService.register(tenant, request)
         if (!response.isSuccessful || response.body() == null) {
             throw Exception("Registro fallido (${tenant}): ${response.message()}")
+        }
+    }
+
+    suspend fun getUsersByTenant(tenant: String): List<com.example.authapp.data.remote.UserData> {
+        val response = apiService.getUsersByTenant(tenant) // tu backend
+        if (!response.isSuccessful || response.body() == null) {
+            throw Exception("Error al obtener usuarios: ${response.message()}")
+        }
+        return response.body()!!
+    }
+
+    suspend fun deleteUser(email: String, tenant: String) {
+        val response = apiService.deleteUser(email, tenant)
+        if (!response.isSuccessful) {
+            throw Exception("Error al eliminar usuario: ${response.message()}")
         }
     }
 
