@@ -14,6 +14,8 @@ import com.example.authapp.presentation.auth.SignUpScreen
 @Composable
 fun AppNav(repository: AuthRepository) {
     val navController = rememberNavController()
+
+    // Creamos los ViewModels **solo una vez** con factory
     val authViewModel: AuthViewModel = viewModel(
         factory = AuthViewModelFactory(repository)
     )
@@ -23,11 +25,11 @@ fun AppNav(repository: AuthRepository) {
 
     NavHost(
         navController = navController,
-        startDestination = "login" // pantalla inicial
+        startDestination = "login"
     ) {
         composable("login") {
             LoginScreen(
-                authViewModel = viewModel(),
+                authViewModel = authViewModel,
                 onNavigateToSignUp = { navController.navigate("signup") },
                 onLoginSuccess = {
                     navController.navigate(Routes.STATUS) {
@@ -39,7 +41,7 @@ fun AppNav(repository: AuthRepository) {
 
         composable("signup") {
             SignUpScreen(
-                authViewModel = viewModel(),
+                authViewModel = authViewModel,
                 onNavigateToLogin = { navController.navigate("login") }
             )
         }
