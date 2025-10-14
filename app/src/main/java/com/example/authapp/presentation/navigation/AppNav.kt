@@ -6,12 +6,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.authapp.data.repository.AuthRepository
+import com.example.authapp.presentation.auth.AuthViewModel
+import com.example.authapp.presentation.auth.AuthViewModelFactory
 import com.example.authapp.presentation.auth.LoginScreen
 import com.example.authapp.presentation.auth.SignUpScreen
 
 @Composable
 fun AppNav(repository: AuthRepository) {
     val navController = rememberNavController()
+    val authViewModel: AuthViewModel = viewModel(
+        factory = AuthViewModelFactory(repository)
+    )
     val statusViewModel: StatusViewModel = viewModel(
         factory = StatusViewModelFactory(repository)
     )
