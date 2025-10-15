@@ -16,9 +16,9 @@ val White = Color(0xFFFFFFFF)
 
 @Composable
 fun UserCard(
-    title: String,
+    title: String, // tenant: "Agromo", "Biomo", "Robo"
     users: List<String>,
-    onAddClick: () -> Unit,
+    onAddClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit
 ) {
     Column(
@@ -27,27 +27,24 @@ fun UserCard(
             .background(White, RoundedCornerShape(12.dp))
             .padding(16.dp)
     ) {
-        // Título de la tarjeta
         Text(text = title, fontSize = 18.sp, color = AwaqGreen)
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Botón de agregar siempre visible
         Button(
-            onClick = onAddClick,
+            onClick = { onAddClick(title) },
             colors = ButtonDefaults.buttonColors(containerColor = AwaqGreen),
             modifier = Modifier.align(Alignment.End)
         ) {
-            Text(text = "Agregar usuario", color = White)
+            Text("Agregar usuario", color = White)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Lista de usuarios
         if (users.isEmpty()) {
             Text("No hay usuarios aún", color = AwaqGreen)
         } else {
-            users.forEach { user ->
+            users.forEach { username ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -55,10 +52,10 @@ fun UserCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(user, color = AwaqGreen)
+                    Text(username, color = AwaqGreen)
 
                     Button(
-                        onClick = { onDeleteClick(user) },
+                        onClick = { onDeleteClick(username) },
                         colors = ButtonDefaults.buttonColors(containerColor = AwaqGreen)
                     ) {
                         Text("Eliminar", color = White)
