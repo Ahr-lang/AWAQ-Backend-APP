@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.authapp.presentation.componentes.UserCard
+import com.example.authapp.presentation.navigation.UserCard
 import com.example.authapp.ui.theme.AwaqGreen
 
 @OptIn(ExperimentalMaterial3Api::class) //ESTO HAY Q CHECARLO ESTA DUDOSO
