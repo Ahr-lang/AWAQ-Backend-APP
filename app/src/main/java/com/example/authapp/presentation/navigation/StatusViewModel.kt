@@ -7,9 +7,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-data class User(val username: String, val email: String)
+data class User(
+    val username: String,
+    val email: String
+)
 
-class StatusViewModel(private val repository: AuthRepository) : ViewModel() {
+class StatusViewModel(
+    private val repository: AuthRepository
+) : ViewModel() {
 
     private val _agromoUsers = MutableStateFlow<List<User>>(emptyList())
     val agromoUsers: StateFlow<List<User>> = _agromoUsers
@@ -20,32 +25,38 @@ class StatusViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _roboUsers = MutableStateFlow<List<User>>(emptyList())
     val roboUsers: StateFlow<List<User>> = _roboUsers
 
-    // Función para obtener usuarios por tenant
+
+    // 🔹 Obtener usuarios por tenant
     fun fetchUsers(tenant: String) {
         viewModelScope.launch {
             try {
                 val usersData = repository.getUsersByTenant(tenant)
-                val users = usersData.map { User(it.username, it.user_email) }
+                val users = usersData.map {
+                    User(
+                        username = it.username,
+                        email = it.user_email
+                    )
+                }
 
-                when (tenant) {
+                when (tenant.lowercase()) {
                     "agromo" -> _agromoUsers.value = users
                     "biomo" -> _biomoUsers.value = users
                     "robo" -> _roboUsers.value = users
                 }
             } catch (e: Exception) {
-                // Manejar error
+                e.printStackTrace()
             }
         }
     }
 
-
+    // 🔹 Agregar usuario (usa el backend real)
     fun addUser(tenant: String, username: String, email: String, password: String) {
         viewModelScope.launch {
             try {
                 repository.registerWithTenant(username, email, password, tenant)
-                fetchUsers(tenant) // refresca la lista
+                fetchUsers(tenant) // Refresca lista
             } catch (e: Exception) {
-                // Manejar error
+                e.printStackTrace()
             }
         }
     }
@@ -53,10 +64,10 @@ class StatusViewModel(private val repository: AuthRepository) : ViewModel() {
     fun deleteUser(tenant: String, email: String) {
         viewModelScope.launch {
             try {
-                repository.deleteUser(email, tenant) // Método que tu backend debe soportar
+                repository.deleteUser(email, tenant)
                 fetchUsers(tenant)
             } catch (e: Exception) {
-                // Manejar error
+                e.printStackTrace()
             }
         }
     }

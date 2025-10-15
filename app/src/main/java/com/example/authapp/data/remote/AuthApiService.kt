@@ -45,6 +45,15 @@ data class RegisterResponse(
     val user_id: String? = null
 )
 
+data class User(
+    val id: Int,
+    val name: String,
+    val email: String,
+    val username: String,
+    val password: String,
+    val tenant: String
+)
+
 interface AuthApiService {
     @POST("/api/back/users/register")
     suspend fun register(
