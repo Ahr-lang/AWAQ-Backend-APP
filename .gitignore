@@ -13,35 +13,3 @@
 .externalNativeBuild
 .cxx
 local.properties
-
-
-@"
-# Android / Gradle
-.gradle/
-**/build/
-local.properties
-.cxx/
-captures/
-
-# Keystores / creds
-*.jks
-*.keystore
-*.pem
-*.p12
-
-# IDE / Tools
-.idea/
-*.iml
-.vscode/
-
-# OS junk
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Kotlin/Android
-**/out/
-"@ | Set-Content -Encoding UTF8 .gitignore
-

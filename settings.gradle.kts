@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AuthApp"
+rootProject.name = "Mawi-App-Back"
 include(":app")
  

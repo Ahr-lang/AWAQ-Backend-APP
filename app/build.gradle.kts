@@ -5,13 +5,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.authapp"
+    namespace = "com.example.mawi_app_back"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.authapp"
+        applicationId = "com.example.mawi_app_back"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -49,7 +49,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -57,8 +56,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-
 
     // Retrofit & OkHttp
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -77,11 +74,5 @@ dependencies {
     // Navegación en Compose
     implementation("androidx.navigation:navigation-compose:2.9.5")
 
-    //Camara de fotos
-    implementation("androidx.camera:camera-core:1.5.0")
-    implementation("androidx.camera:camera-camera2:1.5.0")
-    implementation("androidx.camera:camera-lifecycle:1.5.0")
-    implementation("androidx.camera:camera-video:1.5.0")
-    implementation("androidx.camera:camera-view:1.5.0")
-    implementation("androidx.camera:camera-extensions:1.5.0")
+
 }
