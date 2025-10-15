@@ -28,7 +28,9 @@ fun UsersScreen(
                 UserCard(
                     title = "Agromo",
                     users = agromoUsers.map { it.username },
-                    onAddClick = onNavigateToAddUser,
+                    onAddClick = { tenant ->
+                        onNavigateToAddUser(tenant)
+                    },
                     onDeleteClick = { username ->
                         val user = agromoUsers.find { it.username == username }
                         if (user != null) statusViewModel.deleteUser("agromo", user.email)

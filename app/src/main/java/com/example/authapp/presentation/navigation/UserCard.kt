@@ -19,7 +19,7 @@ fun UserCard(
     title: String, // tenant: "Agromo", "Biomo", "Robo"
     users: List<String>,
     onAddClick: (String) -> Unit,
-    onDeleteClick: (String) -> Unit
+    onDeleteClick: (String) -> Unit,
 ) {
     Column(
         modifier = Modifier

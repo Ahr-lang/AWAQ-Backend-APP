@@ -73,7 +73,7 @@ fun AppNav(repository: AuthRepository) {
             )
         }
 
-        composable("addUser/{tenant}") { backStackEntry ->
+        composable("api/{tenant}/users/register") { backStackEntry ->
             val tenant = backStackEntry.arguments?.getString("tenant") ?: ""
             AddUserScreen(
                 tenant = tenant,
