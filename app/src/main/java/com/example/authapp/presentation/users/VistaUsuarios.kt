@@ -2,22 +2,19 @@ package com.example.authapp.presentation.users
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.authapp.presentation.navigation.UserCard
 import com.example.authapp.ui.theme.AwaqGreen
 
-@OptIn(ExperimentalMaterial3Api::class) //ESTO HAY Q CHECARLO ESTA DUDOSO
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VistaUsuarios() {
+fun VistaUsuarios(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -39,30 +36,47 @@ fun VistaUsuarios() {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // 🔹 Usuarios AGROMO
                 item {
                     UserCard(
-                        title = "Usuarios AGROMO",
+                        title = "Agromo",
                         users = listOf("Usuario 1", "Usuario 2", "Usuario 3"),
-                        onAddClick = { /* TODO */ },
-                        onDeleteClick = { /* TODO */ }
+                        onAddClick = { tenant ->
+                            navController.navigate("addUser/agromo")
+                        },
+                        onDeleteClick = { username ->
+                            // TODO: implementar eliminar usuario
+                        }
                     )
                 }
 
+                // 🔹 Usuarios BIOMO
                 item {
+                    Spacer(modifier = Modifier.height(16.dp))
                     UserCard(
-                        title = "Usuarios BIOMO",
+                        title = "Biomo",
                         users = listOf("Usuario 1", "Usuario 2"),
-                        onAddClick = { /* TODO */ },
-                        onDeleteClick = { /* TODO */ }
+                        onAddClick = { tenant ->
+                            navController.navigate("addUser/biomo")
+                        },
+                        onDeleteClick = { username ->
+                            // TODO: implementar eliminar usuario
+                        }
                     )
                 }
 
+                // 🔹 Usuarios ROBORANGER
                 item {
+                    Spacer(modifier = Modifier.height(16.dp))
                     UserCard(
-                        title = "Usuarios ROBORANGER",
+                        title = "RoboRanger",
                         users = listOf("Usuario 1"),
-                        onAddClick = { /* TODO */ },
-                        onDeleteClick = { /* TODO */ }
+                        onAddClick = { tenant ->
+                            navController.navigate("addUser/robo")
+                        },
+                        onDeleteClick = { username ->
+                            // TODO: implementar eliminar usuario
+                        }
                     )
                 }
             }
