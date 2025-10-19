@@ -29,4 +29,11 @@ interface AuthApiService {
         @Path("tenant") tenant: String,
         @Path("username") username: String
     ): Response<Unit>
+
+    // admin - borrar usuario, checar
+    @DELETE("/api/{tenant}/admin/users/{userId}")
+    suspend fun deleteUser(
+        @Path("tenant") tenant: String,
+        @Path("userId") userId: Int
+    ): Response<Unit>
 }

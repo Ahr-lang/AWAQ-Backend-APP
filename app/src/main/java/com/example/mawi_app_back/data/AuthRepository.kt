@@ -35,4 +35,16 @@ class AuthRepository(
         return tokenManager.token
     }
 
+    // admin - borrar usuario checar
+
+    suspend fun deleteUser(tenant: String, userId: Int): Boolean {
+        return try {
+            val response = apiService.deleteUser(tenant, userId)
+            response.isSuccessful
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
 }
