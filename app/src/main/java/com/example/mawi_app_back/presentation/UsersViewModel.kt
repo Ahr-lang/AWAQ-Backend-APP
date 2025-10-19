@@ -76,19 +76,33 @@ class UsersViewModel(
         }
     }
 
-    fun deleteUser(username: String) {
-        if (username.isBlank()) {
-            _uiState.value = UsersUiState.Error("Username is required")
-            return
-        }
+    // admin - borrar cuenta checar
+    fun deleteUser(userId: Int, username: String) {
         viewModelScope.launch {
             _uiState.value = UsersUiState.Loading
             try {
-                deleteUserUseCase(currentTenant, username)
-                fetchUsers("User \"$username\" deleted")
+                deleteUserUseCase(currentTenant, userId)
+                fetchUsers("Usuario \"$username\" eliminado")
             } catch (e: Exception) {
-                _uiState.value = UsersUiState.Error(e.message ?: "Delete failed")
+                _uiState.value = UsersUiState.Error(e.message ?: "Error al eliminar usuario")
             }
         }
     }
+
+    // IMPLEMENTACION ANTERIOR BORRAR CUANDO FUNCIONE LA NUEVA
+//    fun deleteUser(username: String) {
+//        if (username.isBlank()) {
+//            _uiState.value = UsersUiState.Error("Username is required")
+//            return
+//        }
+//        viewModelScope.launch {
+//            _uiState.value = UsersUiState.Loading
+//            try {
+//                deleteUserUseCase(currentTenant, username)
+//                fetchUsers("User \"$username\" deleted")
+//            } catch (e: Exception) {
+//                _uiState.value = UsersUiState.Error(e.message ?: "Delete failed")
+//            }
+//        }
+//    }
 }
