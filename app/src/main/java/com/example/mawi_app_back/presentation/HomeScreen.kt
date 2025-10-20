@@ -34,21 +34,8 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Encabezado
-            Text(
-                text = "Bienvenido a AWAQ 🌿",
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
-                color = Ink,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "Gestiona tus tareas y recursos aquí",
-                fontSize = 15.sp,
-                color = SubtleText,
-                textAlign = TextAlign.Center
-            )
+            // Logo AWAQ
+            AwaqLogo()
 
             Spacer(Modifier.height(24.dp))
 
@@ -59,28 +46,6 @@ fun HomeScreen(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp,
                     color = Ink
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = "Explora tus módulos, revisa usuarios por tenant o continúa con tus tareas.",
-                    color = SubtleText,
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(Modifier.height(22.dp))
-
-                // Botones principales
-                AwaqPrimaryButton(
-                    text = "Ir a Usuarios",
-                    onClick = { /* TODO: Navegar a Usuarios */ }
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                AwaqSecondaryButton(
-                    text = "Ver Tareas",
-                    onClick = { /* TODO: Navegar a Tareas */ }
                 )
 
                 Spacer(Modifier.height(20.dp))
@@ -94,31 +59,6 @@ fun HomeScreen(
                         "Cerrar sesión",
                         color = Color(0xFFDC2626),
                         fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // Card informativa
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FAF8))
-            ) {
-                Column(Modifier.padding(18.dp)) {
-                    Text(
-                        text = "Consejos",
-                        fontWeight = FontWeight.SemiBold,
-                        color = Ink
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = "• Cambia el tenant desde la pestaña Usuarios para ver listas distintas.\n" +
-                                "• Asegúrate de haber iniciado sesión para acceder a endpoints protegidos.\n" +
-                                "• Mantén tu token seguro: se guarda localmente en DataStore.",
-                        color = SubtleText,
-                        lineHeight = 20.sp
                     )
                 }
             }
