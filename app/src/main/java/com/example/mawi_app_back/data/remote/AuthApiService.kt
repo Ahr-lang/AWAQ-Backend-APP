@@ -31,7 +31,7 @@ interface AuthApiService {
     ): Response<Unit>
 
     // admin - borrar usuario, checar
-    @DELETE("/api/{tenant}/admin/users/{userId}")
+    @DELETE("api/{tenant}/admin/users/{userId}")
     suspend fun deleteUser(
         @Path("tenant") tenant: String,
         @Path("userId") userId: Int

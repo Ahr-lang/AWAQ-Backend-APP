@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.mawi_app_back.data.remote.models.UserDto
 import com.example.mawi_app_back.ui.theme.AwaqGreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -131,7 +132,10 @@ fun UsersScreen(
                         .weight(1f),
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
-                    itemsIndexed(s.users, key = { index, user -> "${user.username}-$index" }) { _, user ->
+                    itemsIndexed(
+                        s.users,
+                        key = { index, user -> (user.id ?: -index).toString() }
+                    ) { _, user ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -174,15 +178,23 @@ fun UsersScreen(
 
     // --- Delete user dialog ---
     if (showDeleteDialog) {
-        DeleteUserDialog(
-            onDismiss = { showDeleteDialog = false },
-            onConfirm = { username ->
-                viewModel.deleteUser(username)
-                showDeleteDialog = false
-            }
-        )
+        val currentState = uiState
+        if (currentState is UsersUiState.Success) {
+            DeleteUserDialog(
+                users = currentState.users,
+                onDismiss = { showDeleteDialog = false },
+                onConfirm = { user ->
+                    user.id?.let { id ->
+                        viewModel.deleteUser(id, user.username)
+                    }
+                    showDeleteDialog = false
+                }
+            )
+        }
     }
 }
+
+/* ---------- Dialogs as top-level composables ---------- */
 
 @Composable
 private fun AddUserDialog(
@@ -230,26 +242,50 @@ private fun AddUserDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DeleteUserDialog(
+    users: List<UserDto>,
     onDismiss: () -> Unit,
-    onConfirm: (username: String) -> Unit
+    onConfirm: (UserDto) -> Unit
 ) {
-    var username by remember { mutableStateOf("") }
+    var selectedUser by remember { mutableStateOf<UserDto?>(null) }
+    var expanded by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Eliminar usuario") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text("Usuario") },
-                    singleLine = true
-                )
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedUser?.username ?: "",
+                        onValueChange = {},
+                        label = { Text("Seleccionar usuario") },
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                        modifier = Modifier.menuAnchor()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        users.forEach { u ->
+                            DropdownMenuItem(
+                                text = { Text(u.username) },
+                                onClick = {
+                                    selectedUser = u
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
                 Text(
-                    "Se eliminará el usuario en el tenant seleccionado.",
+                    "Se eliminará el usuario seleccionado en el tenant actual.",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
@@ -257,7 +293,7 @@ private fun DeleteUserDialog(
         },
         confirmButton = {
             Button(
-                onClick = { onConfirm(username.trim()) },
+                onClick = { selectedUser?.let { onConfirm(it) } },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
                 Text("Eliminar")
@@ -268,3 +304,5 @@ private fun DeleteUserDialog(
         }
     )
 }
+
+
