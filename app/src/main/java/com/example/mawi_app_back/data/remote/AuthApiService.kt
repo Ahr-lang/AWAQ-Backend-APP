@@ -30,11 +30,10 @@ interface AuthApiService {
         @Path("username") username: String
     ): Response<Unit>
 
-    //DELETE INCORRECTO PERO LO DEJO JUST IN CASE NADA QUE SI LO OCUPEMOS AL FINAL
     // admin - borrar usuario, checar
-    //@DELETE("/api/{tenant}/admin/users/{userId}")
-    //suspend fun deleteUser(
-    //    @Path("tenant") tenant: String,
-    //    @Path("userId") userId: Int
-    //): Response<Unit>
+    @DELETE("api/{tenant}/admin/users/{userId}")
+    suspend fun deleteUser(
+        @Path("tenant") tenant: String,
+        @Path("userId") userId: Int
+    ): Response<Unit>
 }

@@ -76,16 +76,11 @@ class UsersViewModel(
         }
     }
 
-    fun deleteUser(username: String) {
-        if (username.isBlank()) {
-            _uiState.value = UsersUiState.Error("El nombre de usuario es requerido")
-            return
-        }
+    fun deleteUser(userId: Int, username: String) {
         viewModelScope.launch {
             _uiState.value = UsersUiState.Loading
             try {
-                // ahora el use case acepta tenant + username
-                deleteUserUseCase(currentTenant, username)
+                deleteUserUseCase(currentTenant, userId)
                 fetchUsers("Usuario \"$username\" eliminado")
             } catch (e: Exception) {
                 _uiState.value = UsersUiState.Error(e.message ?: "Error al eliminar usuario")
