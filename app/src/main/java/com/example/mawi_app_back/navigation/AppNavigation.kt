@@ -34,6 +34,11 @@ import com.example.mawi_app_back.presentation.UsersScreen
 import com.example.mawi_app_back.presentation.UsersViewModel
 import com.example.mawi_app_back.presentation.UsersViewModelFactory
 import com.example.mawi_app_back.ui.BottomBar
+import com.example.mawi_app_back.data.StatusRepository
+import com.example.mawi_app_back.domain.usecase.GetStatusDashboardUseCase
+import com.example.mawi_app_back.presentation.StatusViewModel
+import com.example.mawi_app_back.presentation.StatusViewModelFactory
+import com.example.mawi_app_back.presentation.StatusScreen
 
 @Composable
 fun AppNavigation(
@@ -55,13 +60,18 @@ fun AppNavigation(
     val currentRoute = backStackEntry?.destination?.route
     val showBottomBar = currentRoute in routesWithBottomBar
 
-    // Build Users VM factory once (per composition)
     val usersVmFactory = remember {
         val repo = UsersRepository(apiService)
         val getUC = GetUsersByTenantUseCase(repo)
         val addUC = AddUserUseCase(repo)
         val delUC = DeleteUserUseCase(repo)
         UsersViewModelFactory(getUC, addUC, delUC)
+    }
+
+    val statusVmFactory = remember {
+        val statusRepo = StatusRepository(apiService)
+        val getStatusUC = GetStatusDashboardUseCase(statusRepo)
+        StatusViewModelFactory(getStatusUC)
     }
 
     Scaffold(
@@ -137,8 +147,8 @@ fun AppNavigation(
                         navController.navigate("login") { popUpTo(0) { inclusive = true } }
                     }
                 } else {
-                    // Lightweight placeholder; replace with your real Tasks screen
-                    TasksPlaceholder()
+                    val vm: StatusViewModel = viewModel(factory = statusVmFactory)
+                    StatusScreen(viewModel = vm)
                 }
             }
 

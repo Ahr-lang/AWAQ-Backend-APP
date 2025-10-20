@@ -4,6 +4,8 @@ import com.example.mawi_app_back.data.remote.models.CreateUserRequest
 import com.example.mawi_app_back.data.remote.models.UsersResponse
 import retrofit2.Response
 import retrofit2.http.*
+import com.example.mawi_app_back.presentation.StatusResponse
+import com.example.mawi_app_back.presentation.ErrorsResponse
 
 interface AuthApiService {
     @POST("api/back/users/login")
@@ -17,6 +19,16 @@ interface AuthApiService {
     suspend fun getAdminUsers(
         @Path("tenant") tenant: String
     ): Response<UsersResponse>
+
+    @GET("api/{tenant}/admin/status")
+    suspend fun getAdminStatus(
+        @Path("tenant") tenant: String
+    ): Response<StatusResponse>
+
+    @GET("api/{tenant}/admin/errors")
+    suspend fun getAdminErrors(
+        @Path("tenant") tenant: String
+    ): Response<ErrorsResponse>
 
     @POST("api/{tenant}/admin/users")
     suspend fun createAdminUser(
