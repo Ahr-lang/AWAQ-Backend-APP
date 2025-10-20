@@ -1,19 +1,28 @@
 package com.example.mawi_app_back.presentation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.mawi_app_back.data.remote.models.UserDto
+import androidx.compose.ui.unit.sp
 import com.example.mawi_app_back.ui.theme.AwaqGreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,183 +32,362 @@ fun UsersScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // dialogs visibility
+    // UI state
     var showAddDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var usernameToDelete by remember { mutableStateOf("") }
 
-    // tenant dropdown state
+    // Tenant selector
     var expanded by remember { mutableStateOf(false) }
     var selectedTenant by remember { mutableStateOf(viewModel.currentTenant) }
 
+    // Snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Colores coherentes con Login/SignUp
+    val Ink = Color(0xFF111111)
+    val SubtleText = Color(0xFF50565A)
+    val FieldBorder = Color(0xFFCBD5D1)
+    val GreenSoft = AwaqGreen.copy(alpha = 0.08f)
+    val DividerSoft = Color(0xFFE6E8EA)
+
+    // Cargar usuarios al entrar y al cambiar tenant
     LaunchedEffect(Unit) { viewModel.fetchUsers() }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(20.dp)
-    ) {
-        Text(
-            text = "Usuarios por Tenant",
-            style = MaterialTheme.typography.headlineSmall,
-            color = AwaqGreen,
-            fontWeight = FontWeight.Bold
-        )
+    // Mostrar snackbar cuando llegue un mensaje de éxito
+    LaunchedEffect(uiState) {
+        val msg = (uiState as? UsersUiState.Success)?.message
+        if (!msg.isNullOrBlank()) {
+            snackbarHostState.showSnackbar(msg)
+        }
+    }
 
-        Spacer(Modifier.height(16.dp))
-
-        // Tenant selector
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
+    Scaffold(
+        containerColor = Color.Transparent,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(brush = Brush.verticalGradient(listOf(GreenSoft, Color.White)))
+                .padding(innerPadding)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            OutlinedTextField(
-                readOnly = true,
-                value = selectedTenant.uppercase(),
-                onValueChange = {},
-                label = { Text("Tenant") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                modifier = Modifier.menuAnchor()
-            )
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                viewModel.tenants.forEach { t ->
-                    DropdownMenuItem(
-                        text = { Text(t.uppercase()) },
-                        onClick = {
-                            selectedTenant = t
-                            expanded = false
-                            viewModel.setTenant(t)
-                        }
-                    )
-                }
-            }
-        }
+                // Título
+                Text(
+                    text = "Usuarios por Tenant",
+                    fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Ink,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "Administra cuentas en el tenant seleccionado",
+                    color = SubtleText,
+                    fontSize = 14.sp
+                )
 
-        Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(16.dp))
 
-        // Actions row
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Button(onClick = { showAddDialog = true }) {
-                Text("Agregar usuario")
-            }
-            OutlinedButton(onClick = { showDeleteDialog = true }) {
-                Text("Eliminar usuario")
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-
-        // List section that fills remaining space
-        when (val s = uiState) {
-            is UsersUiState.Loading -> {
-                Box(
+                // Card: Tenant selector + acciones
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
+                        .shadow(8.dp, RoundedCornerShape(28.dp)),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
-                    CircularProgressIndicator(color = AwaqGreen)
-                }
-            }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 18.dp)
+                    ) {
+                        Text(
+                            text = "Configuración",
+                            fontWeight = FontWeight.SemiBold,
+                            color = Ink
+                        )
 
-            is UsersUiState.Error -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        s.message,
-                        color = Color.Red,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
+                        Spacer(Modifier.height(12.dp))
 
-            is UsersUiState.Success -> {
-                val listState = rememberLazyListState()
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentPadding = PaddingValues(vertical = 8.dp)
-                ) {
-                    itemsIndexed(
-                        s.users,
-                        key = { index, user -> (user.id ?: -index).toString() }
-                    ) { _, user ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 6.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF4F4F4))
+                        // Tenant selector
+                        ExposedDropdownMenuBox(
+                            expanded = expanded,
+                            onExpandedChange = { expanded = !expanded }
                         ) {
-                            Text(
-                                text = user.username,
-                                modifier = Modifier.padding(16.dp),
-                                fontWeight = FontWeight.Medium
+                            OutlinedTextField(
+                                readOnly = true,
+                                value = selectedTenant.uppercase(),
+                                onValueChange = {},
+                                label = { Text("Tenant") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                                modifier = Modifier
+                                    .menuAnchor()
+                                    .fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = AwaqGreen,
+                                    unfocusedBorderColor = FieldBorder,
+                                    focusedLabelColor = AwaqGreen,
+                                    cursorColor = AwaqGreen
+                                )
                             )
+                            ExposedDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                viewModel.tenants.forEach { t ->
+                                    DropdownMenuItem(
+                                        text = { Text(t.uppercase()) },
+                                        onClick = {
+                                            selectedTenant = t
+                                            expanded = false
+                                            viewModel.setTenant(t)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(Modifier.height(14.dp))
+                        Divider(color = DividerSoft)
+                        Spacer(Modifier.height(14.dp))
+
+                        // Acciones
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Button(
+                                onClick = { showAddDialog = true },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(52.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = AwaqGreen,
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Text("Agregar usuario", fontWeight = FontWeight.Medium)
+                            }
+                            OutlinedButton(
+                                onClick = {
+                                    usernameToDelete = ""
+                                    showDeleteDialog = true
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(52.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = AwaqGreen),
+                                border = ButtonDefaults.outlinedButtonBorder
+                            ) {
+                                Text("Eliminar usuario", fontWeight = FontWeight.Medium)
+                            }
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(18.dp))
+
+                // Card: Lista de usuarios
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(8.dp, RoundedCornerShape(28.dp)),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 16.dp)
+                    ) {
+                        Text(
+                            text = "Usuarios (${(uiState as? UsersUiState.Success)?.users?.size ?: 0})",
+                            fontWeight = FontWeight.SemiBold,
+                            color = Ink
+                        )
+                        Spacer(Modifier.height(8.dp))
+
+                        when (val s = uiState) {
+                            is UsersUiState.Loading -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(180.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = AwaqGreen)
+                                }
+                            }
+
+                            is UsersUiState.Error -> {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                                    shape = RoundedCornerShape(12.dp),
+                                    tonalElevation = 1.dp,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = s.message,
+                                        modifier = Modifier.padding(12.dp),
+                                        fontSize = 13.sp
+                                    )
+                                }
+                            }
+
+                            is UsersUiState.Success -> {
+                                if (s.users.isEmpty()) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(120.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("No hay usuarios disponibles.", color = SubtleText)
+                                    }
+                                } else {
+                                    val listState = rememberLazyListState()
+                                    LazyColumn(
+                                        state = listState,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentPadding = PaddingValues(vertical = 4.dp)
+                                    ) {
+                                        itemsIndexed(
+                                            s.users,
+                                            key = { index, user -> "${user.username}-$index" }
+                                        ) { _, user ->
+                                            Surface(
+                                                shape = RoundedCornerShape(16.dp),
+                                                color = Color(0xFFF7FAF8),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(vertical = 6.dp)
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Column(
+                                                        modifier = Modifier.weight(1f)
+                                                    ) {
+                                                        Text(
+                                                            text = user.username,
+                                                            fontWeight = FontWeight.Medium,
+                                                            color = Ink
+                                                        )
+                                                        if (!user.user_email.isNullOrBlank()) {
+                                                            Spacer(Modifier.height(2.dp))
+                                                            Text(
+                                                                text = user.user_email,
+                                                                color = SubtleText,
+                                                                fontSize = 13.sp
+                                                            )
+                                                        }
+                                                    }
+                                                    // Botón eliminar por fila (sin íconos → total compatibilidad)
+                                                    TextButton(
+                                                        onClick = {
+                                                            usernameToDelete = user.username
+                                                            showDeleteDialog = true
+                                                        }
+                                                    ) {
+                                                        Text(
+                                                            "Eliminar",
+                                                            color = MaterialTheme.colorScheme.error,
+                                                            fontWeight = FontWeight.SemiBold
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            UsersUiState.Idle -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(120.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("No hay usuarios disponibles.", color = SubtleText)
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            UsersUiState.Idle -> {
+            // Overlay de carga global (bloquea toques)
+            AnimatedVisibility(
+                visible = uiState is UsersUiState.Loading,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.10f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No hay usuarios disponibles.")
+                    CircularProgressIndicator(color = AwaqGreen)
                 }
             }
         }
     }
 
-    // --- Add user dialog ---
+    // Diálogo: Agregar usuario
     if (showAddDialog) {
         AddUserDialog(
             onDismiss = { showAddDialog = false },
             onConfirm = { username, email, password ->
                 viewModel.addUser(username, email, password)
                 showAddDialog = false
-            }
+            },
+            awaqGreen = AwaqGreen,
+            fieldBorder = FieldBorder
         )
     }
 
-    // --- Delete user dialog ---
+    // Diálogo: Eliminar usuario (prellenado si viene de fila)
     if (showDeleteDialog) {
-        val currentState = uiState
-        if (currentState is UsersUiState.Success) {
-            DeleteUserDialog(
-                users = currentState.users,
-                onDismiss = { showDeleteDialog = false },
-                onConfirm = { user ->
-                    user.id?.let { id ->
-                        viewModel.deleteUser(id, user.username)
-                    }
-                    showDeleteDialog = false
-                }
-            )
-        }
+        DeleteUserDialog(
+            initialUsername = usernameToDelete,
+            onDismiss = { showDeleteDialog = false },
+            onConfirm = { username ->
+                viewModel.deleteUser(username)
+                showDeleteDialog = false
+            },
+            awaqGreen = AwaqGreen,
+            fieldBorder = FieldBorder
+        )
     }
 }
 
-/* ---------- Dialogs as top-level composables ---------- */
+/* ===========================
+   Diálogos con estética AWAQ
+   =========================== */
 
 @Composable
 private fun AddUserDialog(
     onDismiss: () -> Unit,
-    onConfirm: (username: String, email: String, password: String) -> Unit
+    onConfirm: (username: String, email: String, password: String) -> Unit,
+    awaqGreen: Color,
+    fieldBorder: Color
 ) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -207,30 +395,6 @@ private fun AddUserDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Agregar usuario") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text("Usuario") },
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Email") },
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Contraseña") },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation()
-                )
-            }
-        },
         confirmButton = {
             Button(onClick = { onConfirm(username.trim(), email.trim(), password) }) {
                 Text("Crear")
@@ -238,62 +402,71 @@ private fun AddUserDialog(
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss) { Text("Cancelar") }
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DeleteUserDialog(
-    users: List<UserDto>,
-    onDismiss: () -> Unit,
-    onConfirm: (UserDto) -> Unit
-) {
-    var selectedUser by remember { mutableStateOf<UserDto?>(null) }
-    var expanded by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Eliminar usuario") },
+        },
+        title = { Text("Agregar usuario", fontWeight = FontWeight.SemiBold) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-                    OutlinedTextField(
-                        value = selectedUser?.username ?: "",
-                        onValueChange = {},
-                        label = { Text("Seleccionar usuario") },
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                        modifier = Modifier.menuAnchor()
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Usuario") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = awaqGreen,
+                        unfocusedBorderColor = fieldBorder,
+                        focusedLabelColor = awaqGreen,
+                        cursorColor = awaqGreen
                     )
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        users.forEach { u ->
-                            DropdownMenuItem(
-                                text = { Text(u.username) },
-                                onClick = {
-                                    selectedUser = u
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-                Text(
-                    "Se eliminará el usuario seleccionado en el tenant actual.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                )
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = awaqGreen,
+                        unfocusedBorderColor = fieldBorder,
+                        focusedLabelColor = awaqGreen,
+                        cursorColor = awaqGreen
+                    )
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Contraseña") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = awaqGreen,
+                        unfocusedBorderColor = fieldBorder,
+                        focusedLabelColor = awaqGreen,
+                        cursorColor = awaqGreen
+                    )
                 )
             }
         },
+        shape = RoundedCornerShape(24.dp)
+    )
+}
+
+@Composable
+private fun DeleteUserDialog(
+    initialUsername: String,
+    onDismiss: () -> Unit,
+    onConfirm: (username: String) -> Unit,
+    awaqGreen: Color,
+    fieldBorder: Color
+) {
+    var username by remember { mutableStateOf(initialUsername) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
         confirmButton = {
             Button(
-                onClick = { selectedUser?.let { onConfirm(it) } },
+                onClick = { onConfirm(username.trim()) },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
                 Text("Eliminar")
@@ -301,8 +474,30 @@ private fun DeleteUserDialog(
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss) { Text("Cancelar") }
-        }
+        },
+        title = { Text("Eliminar usuario", fontWeight = FontWeight.SemiBold) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Usuario") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = awaqGreen,
+                        unfocusedBorderColor = fieldBorder,
+                        focusedLabelColor = awaqGreen,
+                        cursorColor = awaqGreen
+                    )
+                )
+                Text(
+                    "Se eliminará el usuario en el tenant seleccionado.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF6B7280)
+                )
+            }
+        },
+        shape = RoundedCornerShape(24.dp)
     )
 }
-
-

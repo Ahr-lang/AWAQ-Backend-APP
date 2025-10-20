@@ -1,22 +1,28 @@
 package com.example.mawi_app_back.presentation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mawi_app_back.R
@@ -34,134 +40,207 @@ fun SignUpScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     val authState by authViewModel.authState.collectAsState()
 
-    Column(
+    // Colores derivados (coherentes con Login)
+    val Ink = Color(0xFF111111)
+    val SubtleText = Color(0xFF50565A)
+    val FieldBorder = Color(0xFFCBD5D1)
+    val GreenSoft = AwaqGreen.copy(alpha = 0.08f)
+
+    // Navega al login cuando el registro es exitoso
+    LaunchedEffect(authState) {
+        if (authState is AuthState.RegisterSuccess) {
+            onNavigateToLogin()
+            authViewModel.resetState()
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(brush = Brush.verticalGradient(listOf(GreenSoft, Color.White)))
+            .padding(20.dp)
     ) {
-        // --- Logo Awaq ---
-        Image(
-            painter = painterResource(id = R.drawable.awaq),
-            contentDescription = "Logo Awaq",
+        Card(
             modifier = Modifier
-                .height(120.dp)
-                .padding(bottom = 24.dp)
-        )
-
-        // --- Título ---
-        Text(
-            text = "Crea tu cuenta AWAQ",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = AwaqGreen
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // --- Nombre de usuario ---
-        OutlinedTextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text("Nombre de usuario") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = AwaqGreen,
-                unfocusedBorderColor = Color.Gray,
-                focusedLabelColor = AwaqGreen,
-                cursorColor = AwaqGreen
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // --- Correo electrónico ---
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Correo electrónico") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = AwaqGreen,
-                unfocusedBorderColor = Color.Gray,
-                focusedLabelColor = AwaqGreen,
-                cursorColor = AwaqGreen
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // --- Contraseña ---
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Contraseña") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            trailingIcon = {
-                val icon = if (passwordVisible) Icons.Filled.Close else Icons.Filled.FavoriteBorder
-                val desc = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = icon, contentDescription = desc, tint = AwaqGreen)
-                }
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = AwaqGreen,
-                unfocusedBorderColor = Color.Gray,
-                focusedLabelColor = AwaqGreen,
-                cursorColor = AwaqGreen
-            )
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // --- Botón principal ---
-        if (authState is AuthState.Loading) {
-            CircularProgressIndicator(color = AwaqGreen)
-        } else {
-            Button(
-                onClick = { authViewModel.Register(username, email, password) },
+                .fillMaxWidth()
+                .align(Alignment.Center)
+                .shadow(10.dp, RoundedCornerShape(28.dp)),
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = White)
+        ) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = AwaqGreen,
-                    contentColor = White
-                ),
-                shape = MaterialTheme.shapes.medium
+                    .padding(horizontal = 24.dp, vertical = 28.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Registrarse", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                // Logo
+                Image(
+                    painter = painterResource(id = R.drawable.awaq),
+                    contentDescription = "Logo Awaq",
+                    modifier = Modifier
+                        .height(96.dp)
+                        .padding(bottom = 8.dp)
+                )
+
+                // Título y subtítulo
+                Text(
+                    text = "Crea tu cuenta AWAQ",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Ink
+                )
+                Text(
+                    text = "Únete para empezar a gestionar tus recursos",
+                    color = SubtleText,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
+                    textAlign = TextAlign.Center
+                )
+
+                // Username
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Nombre de usuario") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = AwaqGreen,
+                        unfocusedBorderColor = FieldBorder,
+                        focusedLabelColor = AwaqGreen,
+                        cursorColor = AwaqGreen,
+                        focusedTextColor = Ink,
+                        unfocusedTextColor = Ink
+                    )
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                // Email
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Correo electrónico") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = AwaqGreen,
+                        unfocusedBorderColor = FieldBorder,
+                        focusedLabelColor = AwaqGreen,
+                        cursorColor = AwaqGreen,
+                        focusedTextColor = Ink,
+                        unfocusedTextColor = Ink
+                    )
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                // Password (toggle sin íconos para evitar dependencias)
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Contraseña") },
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        TextButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Text(
+                                if (passwordVisible) "Ocultar" else "Mostrar",
+                                color = AwaqGreen,
+                                fontSize = 12.sp
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = AwaqGreen,
+                        unfocusedBorderColor = FieldBorder,
+                        focusedLabelColor = AwaqGreen,
+                        cursorColor = AwaqGreen,
+                        focusedTextColor = Ink,
+                        unfocusedTextColor = Ink
+                    )
+                )
+
+                // Error lindo y legible
+                AnimatedVisibility(
+                    visible = authState is AuthState.Error,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    val message = (authState as? AuthState.Error)?.message ?: ""
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        shape = RoundedCornerShape(12.dp),
+                        tonalElevation = 1.dp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp)
+                    ) {
+                        Text(
+                            text = message,
+                            modifier = Modifier.padding(12.dp),
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(18.dp))
+
+                // Botón principal
+                val isLoading = authState is AuthState.Loading
+                val canSubmit = username.isNotBlank() && email.isNotBlank() && password.isNotBlank() && !isLoading
+
+                Button(
+                    onClick = { authViewModel.Register(username.trim(), email.trim(), password) },
+                    enabled = canSubmit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AwaqGreen,
+                        contentColor = White,
+                        disabledContainerColor = AwaqGreen.copy(alpha = 0.35f),
+                        disabledContentColor = White.copy(alpha = 0.9f)
+                    )
+                ) {
+                    Text("Registrarse", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                // Ir al login
+                TextButton(onClick = onNavigateToLogin) {
+                    Text(
+                        text = "¿Ya tienes cuenta? Inicia sesión",
+                        color = AwaqGreen,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
 
-        if (authState is AuthState.Error) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = (authState as AuthState.Error).message,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // --- Botón para ir al login ---
-        TextButton(onClick = onNavigateToLogin) {
-            Text(
-                text = "¿Ya tienes cuenta? Inicia sesión",
-                color = AwaqGreen,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
-        // --- Efecto para regresar al login tras registro exitoso ---
-        LaunchedEffect(authState) {
-            if (authState is AuthState.RegisterSuccess) {
-                onNavigateToLogin()
-                authViewModel.resetState()
+        // Overlay de carga
+        AnimatedVisibility(
+            visible = authState is AuthState.Loading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = AwaqGreen)
             }
         }
     }
