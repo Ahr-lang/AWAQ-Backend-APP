@@ -1,8 +1,5 @@
 package com.example.mawi_app_back.presentation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -13,15 +10,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mawi_app_back.presentation.StatusPoint
 import com.example.mawi_app_back.domain.usecase.TenantStatusRow
+import com.example.mawi_app_back.presentation.components.*
 import com.example.mawi_app_back.ui.theme.AwaqGreen
 
 @Composable
@@ -30,7 +25,6 @@ fun StatusScreen(viewModel: StatusViewModel) {
 
     val Ink = Color(0xFF111111)
     val Subtle = Color(0xFF50565A)
-    val GreenSoftBg = AwaqGreen.copy(alpha = 0.08f)
     val Yellow = Color(0xFFF59E0B)
     val Red = Color(0xFFDC2626)
     val DividerSoft = Color(0xFFE6E8EA)
@@ -38,13 +32,7 @@ fun StatusScreen(viewModel: StatusViewModel) {
     LaunchedEffect(Unit) { viewModel.load() }
 
     Scaffold(containerColor = Color.Transparent) { inner ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(GreenSoftBg, Color.White)))
-                .padding(inner)
-                .padding(horizontal = 20.dp, vertical = 16.dp)
-        ) {
+        AwaqBackground(modifier = Modifier.padding(inner)) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -55,44 +43,32 @@ fun StatusScreen(viewModel: StatusViewModel) {
 
                 Spacer(Modifier.height(16.dp))
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(8.dp, RoundedCornerShape(28.dp)),
-                    shape = RoundedCornerShape(28.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Column(Modifier.padding(18.dp)) {
-                        // Leyenda
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            LegendDot(AwaqGreen); Text("  < 1% errores", color = Subtle)
-                            Spacer(Modifier.width(16.dp))
-                            LegendDot(Yellow);   Text("  1–5% errores", color = Subtle)
-                            Spacer(Modifier.width(16.dp))
-                            LegendDot(Red);      Text("  >5% o sin actividad", color = Subtle)
-                        }
-                        Spacer(Modifier.height(12.dp))
-                        Divider(color = DividerSoft)
-                        Spacer(Modifier.height(12.dp))
+                AwaqSimpleCard {
+                    // Leyenda
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        LegendDot(AwaqGreen); Text("  < 1% errores", color = Subtle)
+                        Spacer(Modifier.width(16.dp))
+                        LegendDot(Yellow);   Text("  1–5% errores", color = Subtle)
+                        Spacer(Modifier.width(16.dp))
+                        LegendDot(Red);      Text("  >5% o sin actividad", color = Subtle)
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Divider(color = DividerSoft)
+                    Spacer(Modifier.height(12.dp))
 
-                        when (val s = uiState) {
-                            StatusUiState.Loading, StatusUiState.Idle -> {
-                                Box(Modifier.fillMaxWidth().height(180.dp), contentAlignment = Alignment.Center) {
-                                    CircularProgressIndicator(color = AwaqGreen)
-                                }
-                            }
-                            is StatusUiState.Error -> {
-                                Surface(
-                                    color = MaterialTheme.colorScheme.errorContainer,
-                                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                                    shape = RoundedCornerShape(12.dp)
-                                ) { Text(s.message, Modifier.padding(12.dp), fontSize = 13.sp) }
-                            }
-                            is StatusUiState.Success -> {
-                                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                                    s.rows.forEach { row ->
-                                        TenantRow(row, Ink, AwaqGreen, Yellow, Red)
-                                    }
+                    when (val s = uiState) {
+                        StatusUiState.Loading, StatusUiState.Idle -> {
+                            LoadingIndicator(
+                                modifier = Modifier.height(180.dp)
+                            )
+                        }
+                        is StatusUiState.Error -> {
+                            ErrorMessage(message = s.message)
+                        }
+                        is StatusUiState.Success -> {
+                            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                                s.rows.forEach { row ->
+                                    TenantRow(row, Ink, AwaqGreen, Yellow, Red)
                                 }
                             }
                         }
@@ -100,9 +76,7 @@ fun StatusScreen(viewModel: StatusViewModel) {
                 }
             }
 
-            AnimatedVisibility(visible = uiState is StatusUiState.Loading, enter = fadeIn(), exit = fadeOut()) {
-                Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.08f)))
-            }
+            LoadingOverlay(isVisible = uiState is StatusUiState.Loading)
         }
     }
 }
