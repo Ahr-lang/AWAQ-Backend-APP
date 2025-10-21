@@ -52,7 +52,7 @@ data class OnlineUser(
 )
 
 data class OnlineUsersResponse(
-    val tenant: String,
+    val tenant: String?,
     val count: Int,
     val users: List<OnlineUser>
 )
