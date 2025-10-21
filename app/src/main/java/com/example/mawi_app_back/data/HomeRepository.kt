@@ -18,10 +18,13 @@ class HomeRepository(private val apiService: AuthApiService) {
                         val response = apiService.getTopUsersByFormType(tenant)
                         if (response.isSuccessful) {
                             response.body()?.let { topUsersResponse ->
-                                TopUsersByFormTypeResponse(tenant, topUsersResponse.topUsers)
+                                // Safely access topUsers property
+                                val topUsers = topUsersResponse.topUsers ?: emptyList()
+                                TopUsersByFormTypeResponse(tenant, topUsers)
                             }
                         } else null
                     } catch (e: Exception) {
+                        // Return null if anything fails
                         null
                     }
                 }
@@ -39,8 +42,12 @@ class HomeRepository(private val apiService: AuthApiService) {
                             }
                             grouped
                         } ?: emptyList()
-                    } else emptyList()
+                    } else {
+                        // If endpoint doesn't exist, try alternative approach or return empty
+                        emptyList()
+                    }
                 } catch (e: Exception) {
+                    // If endpoint fails, return empty list instead of crashing
                     emptyList()
                 }
             }
@@ -50,7 +57,14 @@ class HomeRepository(private val apiService: AuthApiService) {
                     try {
                         val response = apiService.getOnlineUsers(tenant)
                         if (response.isSuccessful) {
-                            response.body()
+                            response.body()?.let { onlineUsersResponse ->
+                                // Ensure we have valid data
+                                OnlineUsersResponse(
+                                    tenant = tenant,
+                                    count = onlineUsersResponse.count,
+                                    users = onlineUsersResponse.users ?: emptyList()
+                                )
+                            }
                         } else null
                     } catch (e: Exception) {
                         null
@@ -64,7 +78,10 @@ class HomeRepository(private val apiService: AuthApiService) {
                     val response = apiService.getTotalOnlineUsers()
                     if (response.isSuccessful) {
                         response.body()?.total ?: 0
-                    } else 0
+                    } else {
+                        // If endpoint doesn't exist, calculate from individual tenant data
+                        0 // Will be updated after collecting individual data
+                    }
                 } catch (e: Exception) {
                     0
                 }
@@ -84,7 +101,13 @@ class HomeRepository(private val apiService: AuthApiService) {
                     OnlineUsersResponse(tenant, 0, emptyList())
                 }
             }
-            val totalOnline = totalOnlineDeferred.await()
+            val totalOnlineFromGlobal = totalOnlineDeferred.await()
+            // If global endpoint failed (returned 0), calculate from individual tenant data
+            val totalOnline = if (totalOnlineFromGlobal > 0) {
+                totalOnlineFromGlobal
+            } else {
+                onlineUsers.sumOf { it.count }
+            }
 
             HomeUiState.Success(
                 topUsers = topUsers,

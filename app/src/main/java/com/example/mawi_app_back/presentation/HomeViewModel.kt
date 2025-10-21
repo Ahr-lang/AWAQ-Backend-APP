@@ -15,7 +15,8 @@ class HomeViewModel(
     val uiState: StateFlow<HomeUiState> = _uiState
 
     init {
-        loadData()
+        // Don't load data automatically to prevent crashes
+        // Data will be loaded when the UI is ready
     }
 
     fun loadData() {

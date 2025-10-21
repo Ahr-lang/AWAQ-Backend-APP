@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = viewModel(),
+    viewModel: HomeViewModel,
     onLogout: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
