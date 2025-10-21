@@ -3,6 +3,7 @@ package com.example.mawi_app_back.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mawi_app_back.data.remote.AuthApiService
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -27,7 +28,7 @@ class HomeViewModel(
             try {
                 // Load data for all tenants in parallel
                 val topUsersDeferred = tenants.map { tenant ->
-                    launch {
+                    async {
                         try {
                             val response = apiService.getTopUsersByFormType(tenant)
                             if (response.isSuccessful) {
@@ -42,7 +43,7 @@ class HomeViewModel(
                 }
 
                 val formMetricsDeferred = tenants.map { tenant ->
-                    launch {
+                    async {
                         try {
                             val response = apiService.getFormMetrics(tenant)
                             if (response.isSuccessful) {
@@ -57,7 +58,7 @@ class HomeViewModel(
                 }
 
                 val onlineUsersDeferred = tenants.map { tenant ->
-                    launch {
+                    async {
                         try {
                             val response = apiService.getOnlineUsers(tenant)
                             if (response.isSuccessful) {
@@ -70,7 +71,7 @@ class HomeViewModel(
                 }
 
                 // Get total online users
-                val totalOnlineDeferred = launch {
+                val totalOnlineDeferred = async {
                     try {
                         val response = apiService.getTotalOnlineUsers()
                         if (response.isSuccessful) {
@@ -81,11 +82,11 @@ class HomeViewModel(
                     }
                 }
 
-                // Wait for all to complete
-                val topUsers = topUsersDeferred.mapNotNull { it.join(); it }
-                val formMetrics = formMetricsDeferred.mapNotNull { it.join(); it }
-                val onlineUsers = onlineUsersDeferred.mapNotNull { it.join(); it }
-                val totalOnline = totalOnlineDeferred.join()
+                // Wait for all to complete and get results
+                val topUsers = topUsersDeferred.mapNotNull { it.await() }
+                val formMetrics = formMetricsDeferred.mapNotNull { it.await() }
+                val onlineUsers = onlineUsersDeferred.mapNotNull { it.await() }
+                val totalOnline = totalOnlineDeferred.await()
 
                 _uiState.value = HomeUiState.Success(
                     topUsers = topUsers,
