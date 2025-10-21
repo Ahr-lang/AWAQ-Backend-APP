@@ -42,18 +42,21 @@ class HomeViewModel(
                     }
                 }
 
-                val formMetricsDeferred = tenants.map { tenant ->
-                    async {
-                        try {
-                            val response = apiService.getFormMetrics(tenant)
-                            if (response.isSuccessful) {
-                                response.body()?.let { metrics ->
+                val formMetricsDeferred = async {
+                    try {
+                        val response = apiService.getAllFormMetrics()
+                        if (response.isSuccessful) {
+                            response.body()?.let { apiResponse ->
+                                // Group by tenant
+                                val grouped = apiResponse.data.groupBy { it.tenant }.map { (tenant, items) ->
+                                    val metrics = items.map { FormMetrics(it.form_type, it.count) }
                                     FormMetricsResponse(tenant, metrics)
                                 }
-                            } else null
-                        } catch (e: Exception) {
-                            null
-                        }
+                                grouped
+                            } ?: emptyList()
+                        } else emptyList()
+                    } catch (e: Exception) {
+                        emptyList()
                     }
                 }
 
@@ -89,7 +92,7 @@ class HomeViewModel(
                         TopUsersByFormTypeResponse(tenant, emptyList())
                     }
                 }
-                val formMetrics = formMetricsDeferred.mapNotNull { it.await() }
+                val formMetrics = formMetricsDeferred.await()
                 val onlineUsers = onlineUsersDeferred.mapNotNull { it.await() }.ifEmpty {
                     // Provide default empty data if no data returned
                     tenants.map { tenant ->

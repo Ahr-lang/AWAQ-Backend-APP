@@ -227,32 +227,91 @@ fun TopUsersSection(topUsers: List<TopUsersByFormTypeResponse>) {
 
 @Composable
 fun FormMetricsSection(formMetrics: List<FormMetricsResponse>) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(
-            text = "Métricas de Formularios",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            color = AwaqGreen
-        )
-        Spacer(Modifier.height(8.dp))
-
-        formMetrics.forEach { tenantData ->
+    AwaqCard {
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            // Header
             Text(
-                text = "Tenant: ${tenantData.tenant}",
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
+                text = "Métricas de Formularios",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = AwaqGreen,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
-            Spacer(Modifier.height(4.dp))
 
-            tenantData.metrics.forEach { metric ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("${metric.formType}: ${metric.count}")
+            Spacer(Modifier.height(16.dp))
+
+            // Contenido
+            formMetrics.forEach { tenantData ->
+                // Header del tenant
+                Text(
+                    text = tenantData.tenant.uppercase(),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color(0xFF666666),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+
+                if (tenantData.metrics.isEmpty()) {
+                    // No hay métricas
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        color = Color(0xFFF8F9FA),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "Sin métricas registradas",
+                            fontSize = 14.sp,
+                            color = Color(0xFF999999),
+                            modifier = Modifier.padding(16.dp),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                } else {
+                    // Mostrar métricas
+                    tenantData.metrics.forEach { metric ->
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp),
+                            color = Color(0xFFF8F9FA),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = metric.formType.replaceFirstChar { it.uppercase() },
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 14.sp,
+                                        color = Color(0xFF333333)
+                                    )
+                                }
+                                Surface(
+                                    color = AwaqGreen,
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = "${metric.count}",
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        color = White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
+
+                Spacer(Modifier.height(12.dp))
             }
-            Spacer(Modifier.height(8.dp))
         }
     }
 }

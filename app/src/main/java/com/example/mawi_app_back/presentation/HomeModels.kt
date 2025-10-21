@@ -25,6 +25,18 @@ data class FormMetricsResponse(
     val metrics: List<FormMetrics>
 )
 
+data class FormMetricItem(
+    val tenant: String,
+    val form_type: String,
+    val count: Int
+)
+
+data class FormMetricsApiResponse(
+    val success: Boolean,
+    val data: List<FormMetricItem>,
+    val timestamp: String
+)
+
 data class OnlineUser(
     val id: Int,
     val username: String,

@@ -68,4 +68,7 @@ interface AuthApiService {
 
     @GET("api/admin/metrics/online-users/total")
     suspend fun getTotalOnlineUsers(): Response<TotalOnlineUsersResponse>
+
+    @GET("api/admin/metrics/form")
+    suspend fun getAllFormMetrics(): Response<FormMetricsApiResponse>
 }
