@@ -171,10 +171,11 @@ fun OnlineUsersSection(onlineUsers: List<OnlineUsersResponse>, totalOnline: Int)
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "👥",
-                    fontSize = 24.sp
-                )
+                // cambiar de emoji a otra cosa lol
+//                Text(
+//                    text = "👥",
+//                    fontSize = 24.sp
+//                )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = "Usuarios en Línea",
@@ -197,10 +198,11 @@ fun OnlineUsersSection(onlineUsers: List<OnlineUsersResponse>, totalOnline: Int)
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "🌐",
-                        fontSize = 18.sp
-                    )
+                    // cambiar emoji por otra cosa
+//                    Text(
+//                        text = "🌐",
+//                        fontSize = 18.sp
+//                    )
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = "Total conectados: $totalOnline",
