@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -162,30 +163,138 @@ fun FormMetricsSection(formMetrics: List<FormMetricsResponse>) {
 
 @Composable
 fun OnlineUsersSection(onlineUsers: List<OnlineUsersResponse>, totalOnline: Int) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(
-            text = "Usuarios en Línea",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            color = AwaqGreen
-        )
-        Text("Total: $totalOnline", fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
+    AwaqCard {
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            // Header con icono
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "👥",
+                    fontSize = 24.sp
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Usuarios en Línea",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = AwaqGreen
+                )
+            }
 
-        onlineUsers.forEach { tenantData ->
-            Text(
-                text = "Tenant: ${tenantData.tenant} (${tenantData.count})",
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
-            )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(12.dp))
 
-            LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
-                items(tenantData.users) { user ->
-                    Text("${user.username} (${user.email})")
+            // Total global
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = AwaqGreen.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "🌐",
+                        fontSize = 18.sp
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Total conectados: $totalOnline",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = AwaqGreen
+                    )
                 }
             }
-            Spacer(Modifier.height(8.dp))
+
+            Spacer(Modifier.height(16.dp))
+
+            // Lista por tenant
+            onlineUsers.forEach { tenantData ->
+                // Card para cada tenant
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    color = Color(0xFFF8F9FA),
+                    shape = RoundedCornerShape(16.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        // Header del tenant
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = tenantData.tenant.uppercase(),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                color = Color(0xFF666666)
+                            )
+                            Surface(
+                                color = AwaqGreen,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = "${tenantData.count}",
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                    color = White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+
+                        Spacer(Modifier.height(8.dp))
+
+                        // Lista de usuarios
+                        if (tenantData.users.isNotEmpty()) {
+                            LazyColumn(modifier = Modifier.heightIn(max = 150.dp)) {
+                                items(tenantData.users) { user ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "🟢",
+                                            fontSize = 8.sp
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Column {
+                                            Text(
+                                                text = user.username,
+                                                fontWeight = FontWeight.Medium,
+                                                fontSize = 14.sp
+                                            )
+                                            Text(
+                                                text = user.email,
+                                                fontSize = 12.sp,
+                                                color = Color(0xFF666666)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            Text(
+                                text = "Sin usuarios conectados",
+                                fontSize = 12.sp,
+                                color = Color(0xFF999999),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
