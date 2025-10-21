@@ -66,6 +66,6 @@ interface AuthApiService {
         @Path("tenant") tenant: String
     ): Response<OnlineUsersResponse>
 
-    @GET("api/{tenant}/admin/metrics/online-users/total")
+    @GET("api/admin/metrics/online-users/total")
     suspend fun getTotalOnlineUsers(): Response<TotalOnlineUsersResponse>
 }

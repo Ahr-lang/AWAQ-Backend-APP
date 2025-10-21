@@ -85,7 +85,12 @@ class HomeViewModel(
                 // Wait for all to complete and get results
                 val topUsers = topUsersDeferred.mapNotNull { it.await() }
                 val formMetrics = formMetricsDeferred.mapNotNull { it.await() }
-                val onlineUsers = onlineUsersDeferred.mapNotNull { it.await() }
+                val onlineUsers = onlineUsersDeferred.mapNotNull { it.await() }.ifEmpty {
+                    // Provide default empty data if no data returned
+                    tenants.map { tenant ->
+                        OnlineUsersResponse(tenant, 0, emptyList())
+                    }
+                }
                 val totalOnline = totalOnlineDeferred.await()
 
                 _uiState.value = HomeUiState.Success(
