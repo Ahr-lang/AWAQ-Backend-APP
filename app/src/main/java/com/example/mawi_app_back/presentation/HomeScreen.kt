@@ -1,8 +1,6 @@
 package com.example.mawi_app_back.presentation
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -165,26 +163,16 @@ fun FormMetricsSection(formMetrics: List<FormMetricsResponse>) {
 fun OnlineUsersSection(onlineUsers: List<OnlineUsersResponse>, totalOnline: Int) {
     AwaqCard {
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            // Header con icono
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "👥",
-                    fontSize = 24.sp
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = "Usuarios en Línea",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = AwaqGreen
-                )
-            }
+            // Header
+            Text(
+                text = "Usuarios en Línea",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = AwaqGreen,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
 
             // Total global
             Surface(
@@ -192,106 +180,49 @@ fun OnlineUsersSection(onlineUsers: List<OnlineUsersResponse>, totalOnline: Int)
                 color = AwaqGreen.copy(alpha = 0.1f),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Row(
+                Text(
+                    text = "Total Users: $totalOnline",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = AwaqGreen,
                     modifier = Modifier.padding(16.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "🌐",
-                        fontSize = 18.sp
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "Total conectados: $totalOnline",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = AwaqGreen
-                    )
-                }
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
+
+            // Separator
+            Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
+
+            Spacer(Modifier.height(12.dp))
 
             // Lista por tenant
             onlineUsers.forEach { tenantData ->
-                // Card para cada tenant
-                Surface(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    color = Color(0xFFF8F9FA),
-                    shape = RoundedCornerShape(16.dp),
-                    shadowElevation = 2.dp
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        // Header del tenant
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = tenantData.tenant.uppercase(),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                color = Color(0xFF666666)
-                            )
-                            Surface(
-                                color = AwaqGreen,
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text(
-                                    text = "${tenantData.count}",
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                    color = White,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp
-                                )
-                            }
-                        }
-
-                        Spacer(Modifier.height(8.dp))
-
-                        // Lista de usuarios
-                        if (tenantData.users.isNotEmpty()) {
-                            LazyColumn(modifier = Modifier.heightIn(max = 150.dp)) {
-                                items(tenantData.users) { user ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "🟢",
-                                            fontSize = 8.sp
-                                        )
-                                        Spacer(Modifier.width(8.dp))
-                                        Column {
-                                            Text(
-                                                text = user.username,
-                                                fontWeight = FontWeight.Medium,
-                                                fontSize = 14.sp
-                                            )
-                                            Text(
-                                                text = user.email,
-                                                fontSize = 12.sp,
-                                                color = Color(0xFF666666)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            Text(
-                                text = "Sin usuarios conectados",
-                                fontSize = 12.sp,
-                                color = Color(0xFF999999),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+                    Text(
+                        text = "${tenantData.tenant.replaceFirstChar { it.uppercase() }} Users:",
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        color = Color(0xFF333333)
+                    )
+                    Surface(
+                        color = AwaqGreen,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "${tenantData.count}",
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            color = White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
                     }
                 }
             }
