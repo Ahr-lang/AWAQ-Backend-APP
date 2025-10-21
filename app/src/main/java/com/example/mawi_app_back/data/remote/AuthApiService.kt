@@ -6,6 +6,7 @@ import retrofit2.Response
 import retrofit2.http.*
 import com.example.mawi_app_back.presentation.StatusResponse
 import com.example.mawi_app_back.presentation.ErrorsResponse
+import com.example.mawi_app_back.presentation.*
 
 interface AuthApiService {
     @POST("api/back/users/login")
@@ -48,4 +49,23 @@ interface AuthApiService {
         @Path("tenant") tenant: String,
         @Path("userId") userId: Int
     ): Response<Unit>
+
+    // HomeScreen Admin Endpoints
+    @GET("api/{tenant}/admin/users/top-by-form-type")
+    suspend fun getTopUsersByFormType(
+        @Path("tenant") tenant: String
+    ): Response<List<TopUserByFormType>>
+
+    @GET("api/{tenant}/admin/metrics/form")
+    suspend fun getFormMetrics(
+        @Path("tenant") tenant: String
+    ): Response<List<FormMetrics>>
+
+    @GET("api/{tenant}/admin/metrics/online-users")
+    suspend fun getOnlineUsers(
+        @Path("tenant") tenant: String
+    ): Response<OnlineUsersResponse>
+
+    @GET("api/{tenant}/admin/metrics/online-users/total")
+    suspend fun getTotalOnlineUsers(): Response<TotalOnlineUsersResponse>
 }

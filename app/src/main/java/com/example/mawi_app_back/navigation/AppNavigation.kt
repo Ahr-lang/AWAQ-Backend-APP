@@ -39,6 +39,8 @@ import com.example.mawi_app_back.domain.usecase.GetStatusDashboardUseCase
 import com.example.mawi_app_back.presentation.StatusViewModel
 import com.example.mawi_app_back.presentation.StatusViewModelFactory
 import com.example.mawi_app_back.presentation.StatusScreen
+import com.example.mawi_app_back.presentation.HomeViewModelFactory
+import com.example.mawi_app_back.presentation.HomeViewModel
 
 @Composable
 fun AppNavigation(
@@ -72,6 +74,10 @@ fun AppNavigation(
         val statusRepo = StatusRepository(apiService)
         val getStatusUC = GetStatusDashboardUseCase(statusRepo)
         StatusViewModelFactory(getStatusUC)
+    }
+
+    val homeVmFactory = remember {
+        HomeViewModelFactory(apiService)
     }
 
     Scaffold(
@@ -128,7 +134,9 @@ fun AppNavigation(
                         }
                     }
                 } else {
+                    val vm: HomeViewModel = viewModel(factory = homeVmFactory)
                     HomeScreen(
+                        viewModel = vm,
                         onLogout = {
                             authViewModel.signOut()
                             // Navigate immediately to login and clear back stack
