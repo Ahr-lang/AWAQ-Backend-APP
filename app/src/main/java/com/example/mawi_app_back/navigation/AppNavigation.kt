@@ -79,9 +79,7 @@ fun AppNavigation(
     }
 
     val homeVmFactory = remember {
-        val homeRepo = HomeRepository(apiService)
-        val getHomeDataUC = GetHomeDataUseCase(homeRepo)
-        HomeViewModelFactory(getHomeDataUC)
+        HomeViewModelFactory(apiService)
     }
 
     Scaffold(

@@ -54,7 +54,7 @@ data class OnlineUser(
 data class OnlineUsersResponse(
     val tenant: String?,
     val count: Int,
-    val users: List<OnlineUser>
+    val users: List<OnlineUser>? = emptyList()
 )
 
 data class TotalOnlineUsersResponse(

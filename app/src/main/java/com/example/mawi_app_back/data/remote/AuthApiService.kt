@@ -68,6 +68,11 @@ interface AuthApiService {
     @GET("api/admin/metrics/online-users/total")
     suspend fun getTotalOnlineUsers(): Response<TotalOnlineUsersResponse>
 
+    @GET("api/{tenant}/admin/metrics/forms")
+    suspend fun getFormMetrics(
+        @Path("tenant") tenant: String
+    ): Response<List<FormMetrics>>
+
     @GET("api/admin/metrics/forms")
     suspend fun getAllFormMetrics(): Response<FormMetricsApiResponse>
 
@@ -84,6 +89,6 @@ interface AuthApiService {
     @GET("api/{tenant}/admin/users/top-by-form-type")
     suspend fun getTopUsersByFormType(
         @Path("tenant") tenant: String
-    ): Response<TopUsersByFormTypeResponse>
+    ): Response<List<TopUserByFormType>>
 
 }

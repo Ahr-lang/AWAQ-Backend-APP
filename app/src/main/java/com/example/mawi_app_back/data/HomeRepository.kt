@@ -17,9 +17,7 @@ class HomeRepository(private val apiService: AuthApiService) {
                     try {
                         val response = apiService.getTopUsersByFormType(tenant)
                         if (response.isSuccessful) {
-                            response.body()?.let { topUsersResponse ->
-                                // Safely access topUsers property
-                                val topUsers = topUsersResponse.topUsers ?: emptyList()
+                            response.body()?.let { topUsers ->
                                 TopUsersByFormTypeResponse(tenant, topUsers)
                             }
                         } else null
