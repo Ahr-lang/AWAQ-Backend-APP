@@ -97,32 +97,130 @@ fun HomeScreen(
 
 @Composable
 fun TopUsersSection(topUsers: List<TopUsersByFormTypeResponse>) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(
-            text = "Top Usuarios por Tipo de Formulario",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            color = AwaqGreen
-        )
-        Spacer(Modifier.height(8.dp))
+    var showAll by remember { mutableStateOf(false) }
 
-        topUsers.forEach { tenantData ->
+    AwaqCard {
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            // Header
             Text(
-                text = "Tenant: ${tenantData.tenant}",
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
+                text = "Top Usuarios por Tipo de Formulario",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = AwaqGreen,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
-            Spacer(Modifier.height(4.dp))
 
-            tenantData.topUsers.forEach { topUser ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("${topUser.formType}: ${topUser.user.username} (${topUser.formCount})")
+            Spacer(Modifier.height(16.dp))
+
+            // Contenido
+            topUsers.forEach { tenantData ->
+                // Header del tenant
+                Text(
+                    text = tenantData.tenant.uppercase(),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color(0xFF666666),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+
+                if (tenantData.topUsers.isEmpty()) {
+                    // No hay formularios
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        color = Color(0xFFF8F9FA),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "Sin formularios registrados",
+                            fontSize = 14.sp,
+                            color = Color(0xFF999999),
+                            modifier = Modifier.padding(16.dp),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                } else {
+                    // Mostrar formularios
+                    val displayUsers = if (showAll) tenantData.topUsers else tenantData.topUsers.take(3)
+
+                    displayUsers.forEach { topUser ->
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp),
+                            color = Color(0xFFF8F9FA),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = topUser.formType.replaceFirstChar { it.uppercase() },
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 14.sp,
+                                        color = Color(0xFF333333)
+                                    )
+                                    Text(
+                                        text = topUser.user.username,
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF666666)
+                                    )
+                                }
+                                Surface(
+                                    color = AwaqGreen,
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = "${topUser.formCount}",
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        color = White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Botón Show All si hay más de 3 formularios
+                    if (tenantData.topUsers.size > 3 && !showAll) {
+                        Spacer(Modifier.height(8.dp))
+                        TextButton(
+                            onClick = { showAll = true },
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        ) {
+                            Text(
+                                text = "Show All (${tenantData.topUsers.size})",
+                                color = AwaqGreen,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+
+                    // Botón Show Less cuando está expandido
+                    if (showAll && tenantData.topUsers.size > 3) {
+                        Spacer(Modifier.height(8.dp))
+                        TextButton(
+                            onClick = { showAll = false },
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        ) {
+                            Text(
+                                text = "Show Less",
+                                color = AwaqGreen,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                 }
+
+                Spacer(Modifier.height(12.dp))
             }
-            Spacer(Modifier.height(8.dp))
         }
     }
 }

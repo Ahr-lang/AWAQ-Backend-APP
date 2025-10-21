@@ -83,7 +83,12 @@ class HomeViewModel(
                 }
 
                 // Wait for all to complete and get results
-                val topUsers = topUsersDeferred.mapNotNull { it.await() }
+                val topUsers = topUsersDeferred.mapNotNull { it.await() }.ifEmpty {
+                    // Provide default empty data if no data returned
+                    tenants.map { tenant ->
+                        TopUsersByFormTypeResponse(tenant, emptyList())
+                    }
+                }
                 val formMetrics = formMetricsDeferred.mapNotNull { it.await() }
                 val onlineUsers = onlineUsersDeferred.mapNotNull { it.await() }.ifEmpty {
                     // Provide default empty data if no data returned
