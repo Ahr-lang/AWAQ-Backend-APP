@@ -305,7 +305,7 @@ fun OnlineUsersSection(onlineUsers: List<OnlineUsersResponse>, totalOnline: Int)
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${tenantData.tenant.replaceFirstChar { it.uppercase() }} Users:",
+                        text = "${tenantData.tenant?.replaceFirstChar { it.uppercase() } ?: "Unknown"} Users:",
                         fontWeight = FontWeight.Medium,
                         fontSize = 16.sp,
                         color = Color(0xFF333333)

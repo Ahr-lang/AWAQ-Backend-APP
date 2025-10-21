@@ -90,7 +90,9 @@ class HomeViewModel(
                     }
                 }
                 val formMetrics = formMetricsDeferred.mapNotNull { it.await() }
-                val onlineUsers = onlineUsersDeferred.mapNotNull { it.await() }.ifEmpty {
+                val onlineUsers = onlineUsersDeferred.mapIndexedNotNull { index, deferred ->
+                    deferred.await()?.copy(tenant = tenants[index])
+                }.ifEmpty {
                     // Provide default empty data if no data returned
                     tenants.map { tenant ->
                         OnlineUsersResponse(tenant, 0, emptyList())
