@@ -163,14 +163,24 @@ fun FormMetricsSection(formMetrics: List<FormMetricsResponse>) {
 fun OnlineUsersSection(onlineUsers: List<OnlineUsersResponse>, totalOnline: Int) {
     AwaqCard {
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            // Header
-            Text(
-                text = "Usuarios en Línea",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                color = AwaqGreen,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            // Header con icono
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "👥",
+                    fontSize = 24.sp
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Usuarios en Línea",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = AwaqGreen
+                )
+            }
 
             Spacer(Modifier.height(16.dp))
 
@@ -186,14 +196,22 @@ fun OnlineUsersSection(onlineUsers: List<OnlineUsersResponse>, totalOnline: Int)
                     fontSize = 18.sp,
                     color = AwaqGreen,
                     modifier = Modifier.padding(16.dp),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "🌐",
+                        fontSize = 18.sp
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Total conectados: $totalOnline",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = AwaqGreen
+                    )
+                }
             }
-
-            Spacer(Modifier.height(12.dp))
-
-            // Separator
-            Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
 
             Spacer(Modifier.height(12.dp))
 
