@@ -20,11 +20,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.mawi_app_back.data.UsersRepository
+import com.example.mawi_app_back.data.HomeRepository
 import com.example.mawi_app_back.data.local.TenantManager
 import com.example.mawi_app_back.data.remote.AuthApiService
 import com.example.mawi_app_back.domain.usecase.AddUserUseCase
 import com.example.mawi_app_back.domain.usecase.DeleteUserUseCase
 import com.example.mawi_app_back.domain.usecase.GetUsersByTenantUseCase
+import com.example.mawi_app_back.domain.usecase.GetHomeDataUseCase
 import com.example.mawi_app_back.presentation.AuthState
 import com.example.mawi_app_back.presentation.AuthViewModel
 import com.example.mawi_app_back.presentation.HomeScreen
@@ -77,7 +79,9 @@ fun AppNavigation(
     }
 
     val homeVmFactory = remember {
-        HomeViewModelFactory(apiService)
+        val homeRepo = HomeRepository(apiService)
+        val getHomeDataUC = GetHomeDataUseCase(homeRepo)
+        HomeViewModelFactory(getHomeDataUC)
     }
 
     Scaffold(
