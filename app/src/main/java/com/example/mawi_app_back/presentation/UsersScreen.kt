@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.mawi_app_back.data.remote.models.UserDto
@@ -97,7 +98,8 @@ fun UsersScreen(viewModel: UsersViewModel) {
                                         showDeleteDialog = true
                                     },
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.errorContainer
+                                        containerColor = Color.Red,        // color de fondo
+                                        contentColor = Color.White         // color del texto
                                     )
                                 ) {
                                     Text("Eliminar")
