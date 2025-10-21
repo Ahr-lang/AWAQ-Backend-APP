@@ -25,27 +25,18 @@ data class StatusPoint(
 data class ErrorsResponse(
     val success: Boolean,
     val message: String?,
-    val data: ErrorsPayload?,
+    val tenant: String?,
+    val data: List<ErrorItem>?,
+    val count: Int?,
     val timestamp: String?
 )
 
-data class ErrorsPayload(
-    val httpErrors: List<HttpErrorMetric>?,
-    val totalErrors: TotalErrors?,
-    val applicationErrors: List<AppErrorMetric>?
-)
-
-data class HttpErrorMetric(
-    val tenant: String,
-    val status: String,
-    val errorRate: Double
-)
-
-data class TotalErrors(
-    val totalErrorRate: Double
-)
-
-data class AppErrorMetric(
-    val tenant: String,
-    val applicationErrors: Double
+data class ErrorItem(
+    val id: String,
+    val timestamp: String,
+    val level: String,
+    val message: String,
+    val user_id: Int?,
+    val operation: String?,
+    val details: Map<String, Any>?
 )
