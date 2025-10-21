@@ -17,8 +17,8 @@ class HomeRepository(private val apiService: AuthApiService) {
                     try {
                         val response = apiService.getTopUsersByFormType(tenant)
                         if (response.isSuccessful) {
-                            response.body()?.let { topUsers ->
-                                TopUsersByFormTypeResponse(tenant, topUsers)
+                            response.body()?.let { topUsersResponse ->
+                                TopUsersByFormTypeResponse(tenant, topUsersResponse.topUsers)
                             }
                         } else null
                     } catch (e: Exception) {
@@ -27,18 +27,21 @@ class HomeRepository(private val apiService: AuthApiService) {
                 }
             }
 
-            val formMetricsDeferred = tenants.map { tenant ->
-                async {
-                    try {
-                        val response = apiService.getFormMetrics(tenant)
-                        if (response.isSuccessful) {
-                            response.body()?.let { metrics ->
+            val formMetricsDeferred = async {
+                try {
+                    val response = apiService.getAllFormMetrics()
+                    if (response.isSuccessful) {
+                        response.body()?.let { apiResponse ->
+                            // Group by tenant
+                            val grouped = apiResponse.data.groupBy { it.tenant }.map { (tenant, items) ->
+                                val metrics = items.map { FormMetrics(it.form_type, it.count) }
                                 FormMetricsResponse(tenant, metrics)
                             }
-                        } else null
-                    } catch (e: Exception) {
-                        null
-                    }
+                            grouped
+                        } ?: emptyList()
+                    } else emptyList()
+                } catch (e: Exception) {
+                    emptyList()
                 }
             }
 
@@ -74,7 +77,7 @@ class HomeRepository(private val apiService: AuthApiService) {
                     TopUsersByFormTypeResponse(tenant, emptyList())
                 }
             }
-            val formMetrics = formMetricsDeferred.mapNotNull { it.await() }
+            val formMetrics = formMetricsDeferred.await()
             val onlineUsers = onlineUsersDeferred.mapNotNull { it.await() }.ifEmpty {
                 // Provide default empty data if no data returned
                 tenants.map { tenant ->

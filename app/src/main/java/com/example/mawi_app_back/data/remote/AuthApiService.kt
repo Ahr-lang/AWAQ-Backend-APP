@@ -65,10 +65,11 @@ interface AuthApiService {
         @Path("tenant") tenant: String
     ): Response<OnlineUsersResponse>
 
-    @GET("api/{tenant}/admin/metrics/online-users/total")
-    suspend fun getTotalOnlineUsers(
-        @Path("tenant") tenant: String
-    ): Response<TotalOnlineUsersResponse>
+    @GET("api/admin/metrics/online-users/total")
+    suspend fun getTotalOnlineUsers(): Response<TotalOnlineUsersResponse>
+
+    @GET("api/admin/metrics/forms")
+    suspend fun getAllFormMetrics(): Response<FormMetricsApiResponse>
 
     // ---------- FORMS (los 2 que vamos a usar) ----------
 
