@@ -9,18 +9,46 @@ import com.example.mawi_app_back.presentation.ErrorsResponse
 import com.example.mawi_app_back.presentation.*
 
 interface AuthApiService {
-    @POST("api/back/users/login")
-    suspend fun logIn(@Body request: LoginRequest): Response<LoginResponse>
 
-    @POST("api/back/users/register")
-    suspend fun register(@Body request: RegisterRequest): Response<RegisterResponse>
+    // ---------- Auth ----------
+    @POST("api/{tenant}/users/login")
+    suspend fun logIn(
+        @Path("tenant") tenant: String,
+        @Body request: LoginRequest
+    ): Response<LoginResponse>
 
-    // Admin: list ALL users for a tenant
+    @POST("api/{tenant}/users/register")
+    suspend fun register(
+        @Path("tenant") tenant: String,
+        @Body request: RegisterRequest
+    ): Response<RegisterResponse>
+
+    // ---------- Admin: Users ----------
     @GET("api/{tenant}/admin/users")
     suspend fun getAdminUsers(
         @Path("tenant") tenant: String
     ): Response<UsersResponse>
 
+    @POST("api/{tenant}/admin/users")
+    suspend fun createAdminUser(
+        @Path("tenant") tenant: String,
+        @Body req: CreateUserRequest
+    ): Response<Unit>
+
+    // Para evitar colisión de rutas /users/{algo}, separo por id/username:
+    @DELETE("api/{tenant}/admin/users/by-username/{username}")
+    suspend fun deleteAdminUserByUsername(
+        @Path("tenant") tenant: String,
+        @Path("username") username: String
+    ): Response<Unit>
+
+    @DELETE("api/{tenant}/admin/users/{userId}")
+    suspend fun deleteAdminUserById(
+        @Path("tenant") tenant: String,
+        @Path("userId") userId: Int
+    ): Response<Unit>
+
+    // ---------- Admin: Status / Errors ----------
     @GET("api/{tenant}/admin/status")
     suspend fun getAdminStatus(
         @Path("tenant") tenant: String
@@ -31,44 +59,30 @@ interface AuthApiService {
         @Path("tenant") tenant: String
     ): Response<ErrorsResponse>
 
-    @POST("api/{tenant}/admin/users")
-    suspend fun createAdminUser(
-        @Path("tenant") tenant: String,
-        @Body req: CreateUserRequest
-    ): Response<Unit>
-
-    @DELETE("api/{tenant}/admin/users/{username}")
-    suspend fun deleteAdminUser(
-        @Path("tenant") tenant: String,
-        @Path("username") username: String
-    ): Response<Unit>
-
-    // admin - borrar usuario, checar
-    @DELETE("api/{tenant}/admin/users/{userId}")
-    suspend fun deleteUser(
-        @Path("tenant") tenant: String,
-        @Path("userId") userId: Int
-    ): Response<Unit>
-
-    // HomeScreen Admin Endpoints
-    @GET("api/{tenant}/admin/users/top-by-form-type")
-    suspend fun getTopUsersByFormType(
-        @Path("tenant") tenant: String
-    ): Response<List<TopUserByFormType>>
-
-    @GET("api/{tenant}/admin/metrics/form")
-    suspend fun getFormMetrics(
-        @Path("tenant") tenant: String
-    ): Response<List<FormMetrics>>
-
+    // ---------- Home / Métricas ----------
     @GET("api/{tenant}/admin/metrics/online-users")
     suspend fun getOnlineUsers(
         @Path("tenant") tenant: String
     ): Response<OnlineUsersResponse>
 
-    @GET("api/admin/metrics/online-users/total")
-    suspend fun getTotalOnlineUsers(): Response<TotalOnlineUsersResponse>
+    @GET("api/{tenant}/admin/metrics/online-users/total")
+    suspend fun getTotalOnlineUsers(
+        @Path("tenant") tenant: String
+    ): Response<TotalOnlineUsersResponse>
 
-    @GET("api/admin/metrics/form")
-    suspend fun getAllFormMetrics(): Response<FormMetricsApiResponse>
+    // ---------- FORMS (los 2 que vamos a usar) ----------
+
+    // 1) Usuarios con conteo de formularios (solo backend users)
+    //    Devuelve una lista (ajusta el tipo si tu modelo es otro)
+    @GET("api/{tenant}/admin/users/forms")
+    suspend fun getUsersWithFormCounts(
+        @Path("tenant") tenant: String
+    ): Response<List<UserFormsCount>>
+
+    // 2) Top user por tipo de formulario (solo backend users)
+    @GET("api/{tenant}/admin/users/top-by-form-type")
+    suspend fun getTopUsersByFormType(
+        @Path("tenant") tenant: String
+    ): Response<TopUsersByFormTypeResponse>
+
 }

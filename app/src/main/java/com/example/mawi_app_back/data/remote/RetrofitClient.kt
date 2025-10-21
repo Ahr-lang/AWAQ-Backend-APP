@@ -11,7 +11,7 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 object RetrofitClient {
-    private const val BASE_URL = "https://ekgcss8ww8o4ok480g08soo4.91.98.193.75.sslip.io"
+    private const val BASE_URL = "https://ekgcss8ww8o4ok480g08soo4.91.98.193.75.sslip.io/"
 
     fun create(tokenManager: TokenManager): AuthApiService {
         val logging = HttpLoggingInterceptor().apply {

@@ -4,6 +4,13 @@ import com.example.mawi_app_back.data.remote.models.UserDto
 
 // Data models for HomeScreen API responses
 
+data class UserFormsCount(
+    val userId: Int,
+    val username: String,
+    val email: String,
+    val formCount: Int
+)
+
 data class TopUserByFormType(
     val formType: String,
     val user: UserDto,

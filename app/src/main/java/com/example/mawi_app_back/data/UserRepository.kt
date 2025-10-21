@@ -24,7 +24,7 @@ class UsersRepository(
     suspend fun deleteUser(tenant: String, userId: Int): Boolean {
         println("🟢 Deleting user ID $userId from tenant $tenant")
         return try {
-            val resp = api.deleteUser(tenant, userId)
+            val resp = api.deleteAdminUserById(tenant, userId)
             println("🟢 Response code: ${resp.code()}")
             if (!resp.isSuccessful) {
                 error("Error ${resp.code()}: ${resp.message()}")
