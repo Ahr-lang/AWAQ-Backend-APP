@@ -10,15 +10,30 @@ class HomeRepository(private val apiService: AuthApiService) {
     suspend fun getHomeData(): HomeUiState.Success {
         return coroutineScope {
             // Load data for all tenants in parallel
-            val tenants = listOf("agromo", "biomo", "back")
+            val tenants = listOf("agromo", "biomo", "robo")
+
+            val usersWithFormsDeferred = tenants.map { tenant ->
+                async {
+                    try {
+                        val response = apiService.getUsersWithFormCounts(tenant)
+                        if (response.isSuccessful) {
+                            response.body()?.let { apiResponse ->
+                                UsersWithFormsResponse(apiResponse.tenant, apiResponse.data)
+                            }
+                        } else null
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+            }
 
             val topUsersDeferred = tenants.map { tenant ->
                 async {
                     try {
                         val response = apiService.getTopUsersByFormType(tenant)
                         if (response.isSuccessful) {
-                            response.body()?.let { topUsers ->
-                                TopUsersByFormTypeResponse(tenant, topUsers)
+                            response.body()?.let { apiResponse ->
+                                TopUsersByFormTypeResponse(apiResponse.tenant, apiResponse.data)
                             }
                         } else null
                     } catch (e: Exception) {
@@ -83,6 +98,7 @@ class HomeRepository(private val apiService: AuthApiService) {
             }
 
             // Wait for all to complete and get results
+            val usersWithForms = usersWithFormsDeferred.mapNotNull { it.await() }
             val topUsers = topUsersDeferred.mapNotNull { it.await() }.ifEmpty {
                 // Provide default empty data if no data returned
                 tenants.map { tenant ->
@@ -96,6 +112,7 @@ class HomeRepository(private val apiService: AuthApiService) {
             val totalOnline = onlineUsers.sumOf { it.count }
 
             HomeUiState.Success(
+                usersWithForms = usersWithForms,
                 topUsers = topUsers,
                 formMetrics = formMetrics,
                 onlineUsers = onlineUsers,

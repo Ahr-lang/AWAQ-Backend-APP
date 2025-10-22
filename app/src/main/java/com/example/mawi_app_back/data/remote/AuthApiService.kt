@@ -84,12 +84,12 @@ interface AuthApiService {
     @GET("api/{tenant}/admin/users/forms")
     suspend fun getUsersWithFormCounts(
         @Path("tenant") tenant: String
-    ): Response<List<UserFormsCount>>
+    ): Response<UsersWithFormsApiResponse>
 
     // 2) Top user por tipo de formulario (solo backend users)
     @GET("api/{tenant}/admin/users/top-by-form-type")
     suspend fun getTopUsersByFormType(
         @Path("tenant") tenant: String
-    ): Response<List<TopUserByFormType>>
+    ): Response<TopUsersByFormTypeApiResponse>
 
 }

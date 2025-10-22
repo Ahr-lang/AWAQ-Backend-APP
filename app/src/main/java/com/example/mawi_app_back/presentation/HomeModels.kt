@@ -4,6 +4,26 @@ import com.example.mawi_app_back.data.remote.models.UserDto
 
 // Data models for HomeScreen API responses
 
+// Users with total form counts
+data class UserWithFormCount(
+    val id: Int,
+    val username: String,
+    val user_email: String,
+    val forms_count: Int
+)
+
+data class UsersWithFormsApiResponse(
+    val message: String,
+    val tenant: String,
+    val data: List<UserWithFormCount>,
+    val count: Int
+)
+
+data class UsersWithFormsResponse(
+    val tenant: String,
+    val users: List<UserWithFormCount>
+)
+
 data class UserFormsCount(
     val userId: Int,
     val username: String,
@@ -12,9 +32,24 @@ data class UserFormsCount(
 )
 
 data class TopUserByFormType(
-    val formType: String,
-    val user: UserDto,
-    val formCount: Int
+    val form_type: String,
+    val user_id: Int,
+    val username: String,
+    val user_email: String,
+    val count: Int
+) {
+    // Helper properties for backwards compatibility
+    val formType: String get() = form_type
+    val formCount: Int get() = count
+    val user: UserDto get() = UserDto(user_id, username, user_email)
+}
+
+// API response wrappers
+data class TopUsersByFormTypeApiResponse(
+    val message: String,
+    val tenant: String,
+    val data: List<TopUserByFormType>,
+    val count: Int
 )
 
 data class TopUsersByFormTypeResponse(
@@ -78,6 +113,7 @@ sealed class HomeUiState {
     object Idle : HomeUiState()
     object Loading : HomeUiState()
     data class Success(
+        val usersWithForms: List<UsersWithFormsResponse>,
         val topUsers: List<TopUsersByFormTypeResponse>,
         val formMetrics: List<FormMetricsResponse>,
         val onlineUsers: List<OnlineUsersResponse>,

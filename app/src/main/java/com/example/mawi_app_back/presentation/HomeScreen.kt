@@ -59,17 +59,22 @@ fun HomeScreen(
                     is HomeUiState.Success -> {
                         val data = uiState as HomeUiState.Success
 
-                        // Sección 1: Top Usuarios por Tipo de Formulario
+                        // Sección 1: Usuarios con Formularios
+                        UsersWithFormsSection(data.usersWithForms)
+
+                        Spacer(Modifier.height(16.dp))
+
+                        // Sección 2: Top Usuarios por Tipo de Formulario
                         TopUsersSection(data.topUsers)
 
                         Spacer(Modifier.height(16.dp))
 
-                        // Sección 2: Métricas de Formularios
+                        // Sección 3: Métricas de Formularios
                         FormMetricsSection(data.formMetrics)
 
                         Spacer(Modifier.height(16.dp))
 
-                        // Sección 3: Usuarios en Línea
+                        // Sección 4: Usuarios en Línea
                         OnlineUsersSection(data.onlineUsers, data.totalOnline)
                     }
                     HomeUiState.Idle -> {
@@ -92,6 +97,102 @@ fun HomeScreen(
 
         // Overlay de carga
         LoadingOverlay(isVisible = uiState is HomeUiState.Loading)
+    }
+}
+
+@Composable
+fun UsersWithFormsSection(usersWithForms: List<UsersWithFormsResponse>) {
+    AwaqCard {
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            // Header
+            Text(
+                text = "Usuarios con Formularios",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = AwaqGreen,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            // Contenido
+            usersWithForms.forEach { tenantData ->
+                // Header del tenant
+                Text(
+                    text = tenantData.tenant.uppercase(),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color(0xFF666666),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+
+                if (tenantData.users.isEmpty()) {
+                    // No hay usuarios
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        color = Color(0xFFF8F9FA),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "Sin usuarios registrados",
+                            fontSize = 14.sp,
+                            color = Color(0xFF999999),
+                            modifier = Modifier.padding(16.dp),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                } else {
+                    // Mostrar usuarios
+                    tenantData.users.forEach { user ->
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp),
+                            color = Color(0xFFF8F9FA),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = user.username,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 14.sp,
+                                        color = Color(0xFF333333)
+                                    )
+                                    Text(
+                                        text = user.user_email,
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF666666)
+                                    )
+                                }
+                                Surface(
+                                    color = AwaqGreen,
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = "${user.forms_count}",
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        color = White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(12.dp))
+            }
+        }
     }
 }
 
