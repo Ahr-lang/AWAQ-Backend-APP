@@ -8,6 +8,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class BottomNavItem(val route: String, val label: String, val icon: ImageVector) {
     data object Home    : BottomNavItem("home",    "Inicio",  Icons.Default.Home)
-    data object Tasks   : BottomNavItem("tasks",   "Tareas",  Icons.Default.List)
+    data object Tasks   : BottomNavItem("tasks",   "Status",  Icons.Default.List)
     data object Users : BottomNavItem("users", "Usuarios",  Icons.Default.Person)
 }
