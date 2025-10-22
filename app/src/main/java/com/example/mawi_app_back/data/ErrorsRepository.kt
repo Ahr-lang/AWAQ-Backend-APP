@@ -9,7 +9,7 @@ class ErrorsRepository(
     suspend fun getTenantErrors(tenant: String): List<ErrorItem> {
         val resp = api.getAdminErrors(tenant)
         if (resp.isSuccessful) {
-            return resp.body()?.data ?: emptyList()
+            return resp.body()?.data?.httpErrors?.flatMap { it.recentErrors } ?: emptyList()
         }
         error("Error ${resp.code()}: ${resp.message()}")
     }

@@ -2,11 +2,13 @@ package com.example.mawi_app_back.domain.usecase
 
 import com.example.mawi_app_back.data.StatusRepository
 import com.example.mawi_app_back.presentation.StatusPoint
+import com.example.mawi_app_back.presentation.ErrorItem
 
 data class TenantStatusRow(
     val tenant: String,
     val hours: List<StatusPoint>,
-    val dailyStatus: String
+    val dailyStatus: String,
+    val errors: List<ErrorItem>
 )
 
 class GetStatusDashboardUseCase(
@@ -18,17 +20,14 @@ class GetStatusDashboardUseCase(
         return tenants.map { tenant ->
             val hours = repo.getTenantStatus(tenant)
             val daily = computeDailyStatus(hours)
-            TenantStatusRow(tenant = tenant, hours = hours, dailyStatus = daily)
+            val errors = repo.getTenantErrors(tenant).flatMap { it.recentErrors }
+            TenantStatusRow(tenant = tenant, hours = hours, dailyStatus = daily, errors = errors)
         }
     }
 
     private fun computeDailyStatus(hours: List<StatusPoint>): String {
-        // rojo si alguna hora >5% o sin actividad
-        if (hours.any { it.requests == 0 || it.errorRate > 5.0 || it.status.equals("red", true) })
-            return "red"
-        // amarillo si alguna hora 1..5%
-        if (hours.any { it.errorRate in 1.0..5.0 || it.status.equals("yellow", true) })
-            return "yellow"
+        if (hours.any { it.status == "red" }) return "red"
+        if (hours.any { it.status == "yellow" }) return "yellow"
         return "green"
     }
 }

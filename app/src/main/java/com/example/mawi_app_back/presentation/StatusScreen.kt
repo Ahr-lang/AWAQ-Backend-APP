@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mawi_app_back.presentation.StatusPoint
 import com.example.mawi_app_back.domain.usecase.TenantStatusRow
+import com.example.mawi_app_back.presentation.ErrorItem
 import com.example.mawi_app_back.presentation.components.*
 import com.example.mawi_app_back.ui.theme.AwaqGreen
 import androidx.compose.material.icons.Icons
@@ -35,6 +36,8 @@ fun StatusScreen(viewModel: StatusViewModel) {
 
     var legendVisible by remember { mutableStateOf(true) }
     var expandedApp by remember { mutableStateOf<String?>(null) }
+    var showErrorsDialog by remember { mutableStateOf(false) }
+    var selectedErrors by remember { mutableStateOf<List<ErrorItem>>(emptyList()) }
 
     LaunchedEffect(Unit) { viewModel.load() }
 
@@ -91,7 +94,7 @@ fun StatusScreen(viewModel: StatusViewModel) {
                         is StatusUiState.Success -> {
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 s.rows.forEach { row ->
-                                    AppStatusPanel(row, expandedApp == row.tenant, { expandedApp = if (expandedApp == row.tenant) null else row.tenant }, Ink, AwaqGreen, Yellow, Red)
+                                    AppStatusPanel(row, expandedApp == row.tenant, { expandedApp = if (expandedApp == row.tenant) null else row.tenant }, { errors -> selectedErrors = errors; showErrorsDialog = true }, Ink, AwaqGreen, Yellow, Red)
                                 }
                             }
                         }
@@ -102,6 +105,69 @@ fun StatusScreen(viewModel: StatusViewModel) {
             LoadingOverlay(isVisible = uiState is StatusUiState.Loading)
         }
     }
+
+    if (showErrorsDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorsDialog = false },
+            title = { Text("Errores de la Hora") },
+            text = {
+                LazyColumn {
+                    if (selectedErrors.isEmpty()) {
+                        item {
+                            Text("No hay errores en esta hora", color = Ink, fontSize = 14.sp)
+                        }
+                    } else {
+                        items(selectedErrors) { error ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = error.operation,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = Ink
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = "Mensaje: ${error.message}",
+                                    fontSize = 12.sp,
+                                    color = Ink
+                                )
+                                error.statusCode?.let {
+                                    Text(
+                                        text = "Status: $it",
+                                        fontSize = 12.sp,
+                                        color = Ink
+                                    )
+                                }
+                                Text(
+                                    text = "Hora: ${error.timestamp}",
+                                    fontSize = 11.sp,
+                                    color = Ink.copy(alpha = 0.7f)
+                                )
+                                error.userId?.let {
+                                    Text(
+                                        text = "User ID: $it",
+                                        fontSize = 11.sp,
+                                        color = Ink.copy(alpha = 0.7f)
+                                    )
+                                }
+                                Spacer(Modifier.height(8.dp))
+                                Divider(color = Ink.copy(alpha = 0.2f))
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = { showErrorsDialog = false }) {
+                    Text("Cerrar")
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -109,6 +175,7 @@ private fun AppStatusPanel(
     row: TenantStatusRow,
     isExpanded: Boolean,
     onToggle: () -> Unit,
+    onHourClick: (List<ErrorItem>) -> Unit,
     ink: Color,
     green: Color,
     yellow: Color,
@@ -138,7 +205,7 @@ private fun AppStatusPanel(
             Spacer(Modifier.height(8.dp))
             LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 items<StatusPoint>(row.hours) { point ->
-                    HourDetailRow(point, green, yellow, red, ink)
+                    HourDetailRow(point, green, yellow, red, ink, onHourClick, row.errors, row.tenant)
                 }
             }
         }
@@ -146,16 +213,22 @@ private fun AppStatusPanel(
 }
 
 @Composable
-private fun HourDetailRow(point: StatusPoint, green: Color, yellow: Color, red: Color, ink: Color) {
-    val color = when {
-        point.requests == 0 -> red
-        point.errorRate < 1.0 -> green
-        point.errorRate < 5.0 -> yellow
-        else -> red
+private fun HourDetailRow(point: StatusPoint, green: Color, yellow: Color, red: Color, ink: Color, onHourClick: (List<ErrorItem>) -> Unit, allErrors: List<ErrorItem>, tenant: String) {
+    val color = when (point.status) {
+        "green" -> green
+        "yellow" -> yellow
+        "red" -> red
+        else -> green
     }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                // Filter errors by tenant
+                val tenantErrors = allErrors.filter { it.tenant == tenant }
+                onHourClick(tenantErrors)
+            }
     ) {
         Text("${point.hour}:00", color = ink, fontSize = 12.sp, modifier = Modifier.width(40.dp))
         Box(
@@ -171,11 +244,11 @@ private fun HourDetailRow(point: StatusPoint, green: Color, yellow: Color, red: 
 
 @Composable
 private fun HourBlock(point: StatusPoint, green: Color, yellow: Color, red: Color) {
-    val color = when {
-        point.requests == 0 -> red
-        point.errorRate < 1.0 -> green
-        point.errorRate < 5.0 -> yellow
-        else -> red
+    val color = when (point.status) {
+        "green" -> green
+        "yellow" -> yellow
+        "red" -> red
+        else -> green
     }
     Box(
         modifier = Modifier
