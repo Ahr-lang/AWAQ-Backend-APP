@@ -10,7 +10,7 @@ class HomeRepository(private val apiService: AuthApiService) {
     suspend fun getHomeData(): HomeUiState.Success {
         return coroutineScope {
             // Load data for all tenants in parallel
-            val tenants = listOf("agromo", "biomo", "roboranger")
+            val tenants = listOf("agromo", "biomo", "back")
 
             val topUsersDeferred = tenants.map { tenant ->
                 async {
@@ -50,39 +50,36 @@ class HomeRepository(private val apiService: AuthApiService) {
                 }
             }
 
-            val onlineUsersDeferred = tenants.map { tenant ->
-                async {
-                    try {
-                        val response = apiService.getOnlineUsers(tenant)
-                        if (response.isSuccessful) {
-                            response.body()?.let { onlineUsersResponse ->
-                                // Ensure we have valid data
-                                OnlineUsersResponse(
-                                    tenant = tenant,
-                                    count = onlineUsersResponse.count,
-                                    users = onlineUsersResponse.users ?: emptyList()
-                                )
-                            }
-                        } else null
-                    } catch (e: Exception) {
-                        null
+            val onlineUsersDeferred = async {
+                try {
+                    val response = apiService.getOnlineUsers("agromo")  // Use a valid tenant like agromo
+                    if (response.isSuccessful) {
+                        response.body()?.let { apiResponse ->
+                            if (apiResponse.success) {
+                                // Convert to list of OnlineUsersResponse
+                                apiResponse.data.map { tenantData ->
+                                    OnlineUsersResponse(
+                                        tenant = tenantData.tenant,
+                                        count = tenantData.onlineUsers,
+                                        users = emptyList() // Swagger doesn't provide user list
+                                    )
+                                }
+                            } else emptyList()
+                        } ?: emptyList()
+                    } else {
+                        println("Error fetching online users: ${response.code()} - ${response.message()}")
+                        emptyList()
                     }
+                } catch (e: Exception) {
+                    println("Exception fetching online users: ${e.message}")
+                    emptyList()
                 }
             }
 
-            // Get total online users
+            // Get total online users (calculate from individual tenant data)
             val totalOnlineDeferred = async {
-                try {
-                    val response = apiService.getTotalOnlineUsers()
-                    if (response.isSuccessful) {
-                        response.body()?.total ?: 0
-                    } else {
-                        // If endpoint doesn't exist, calculate from individual tenant data
-                        0 // Will be updated after collecting individual data
-                    }
-                } catch (e: Exception) {
-                    0
-                }
+                // Calculate from individual tenant data after collecting it
+                0 // Placeholder, will be updated below
             }
 
             // Wait for all to complete and get results
@@ -93,19 +90,10 @@ class HomeRepository(private val apiService: AuthApiService) {
                 }
             }
             val formMetrics = formMetricsDeferred.await()
-            val onlineUsers = onlineUsersDeferred.mapNotNull { it.await() }.ifEmpty {
-                // Provide default empty data if no data returned
-                tenants.map { tenant ->
-                    OnlineUsersResponse(tenant, 0, emptyList())
-                }
-            }
+            val onlineUsers = onlineUsersDeferred.await()
             val totalOnlineFromGlobal = totalOnlineDeferred.await()
-            // If global endpoint failed (returned 0), calculate from individual tenant data
-            val totalOnline = if (totalOnlineFromGlobal > 0) {
-                totalOnlineFromGlobal
-            } else {
-                onlineUsers.sumOf { it.count }
-            }
+            // Always calculate from individual tenant data since global endpoint doesn't exist
+            val totalOnline = onlineUsers.sumOf { it.count }
 
             HomeUiState.Success(
                 topUsers = topUsers,

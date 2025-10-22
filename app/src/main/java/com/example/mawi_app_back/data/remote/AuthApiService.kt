@@ -62,11 +62,12 @@ interface AuthApiService {
     // ---------- Home / Métricas ----------
     @GET("api/{tenant}/admin/metrics/online-users")
     suspend fun getOnlineUsers(
-        @Path("tenant") tenant: String
-    ): Response<OnlineUsersResponse>
+        @Path("tenant") tenant: String = "back"
+    ): Response<OnlineUsersApiResponse>
 
-    @GET("api/admin/metrics/online-users/total")
-    suspend fun getTotalOnlineUsers(): Response<TotalOnlineUsersResponse>
+    // Removido: endpoint total no existe en Swagger
+    // @GET("api/admin/metrics/online-users/total")
+    // suspend fun getTotalOnlineUsers(): Response<TotalOnlineUsersResponse>
 
     @GET("api/{tenant}/admin/metrics/forms")
     suspend fun getFormMetrics(

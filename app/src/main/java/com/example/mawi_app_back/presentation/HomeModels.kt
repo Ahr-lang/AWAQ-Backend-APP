@@ -62,6 +62,17 @@ data class TotalOnlineUsersResponse(
     val byTenant: Map<String, Int>
 )
 
+data class OnlineUsersApiResponse(
+    val success: Boolean,
+    val data: List<OnlineTenantData>,
+    val timestamp: String
+)
+
+data class OnlineTenantData(
+    val tenant: String,
+    val onlineUsers: Int
+)
+
 // UI States
 sealed class HomeUiState {
     object Idle : HomeUiState()
