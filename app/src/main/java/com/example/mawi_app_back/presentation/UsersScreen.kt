@@ -49,10 +49,13 @@ fun UsersScreen(viewModel: UsersViewModel) {
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (tenant == viewModel.currentTenant)
                             AwaqGreen
-                        else MaterialTheme.colorScheme.secondary
+                        else MaterialTheme.colorScheme.secondary,
+                        contentColor = if (tenant == viewModel.currentTenant)
+                            Color.White
+                        else MaterialTheme.colorScheme.onSecondary
                     )
                 ) {
-                    Text(tenant)
+                    Text(tenant, maxLines = 1)
                 }
             }
         }
