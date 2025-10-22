@@ -15,7 +15,7 @@ class HomeViewModel(
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Idle)
     val uiState: StateFlow<HomeUiState> = _uiState
 
-    private val tenants = listOf("agromo", "biomo", "roboranger")
+    private val tenants = listOf("agromo", "biomo", "back")
 
     init {
         loadData()
@@ -57,30 +57,31 @@ class HomeViewModel(
                     }
                 }
 
-                val onlineUsersDeferred = tenants.map { tenant ->
-                    async {
-                        try {
-                            val response = apiService.getOnlineUsers(tenant)
-                            if (response.isSuccessful) {
-                                response.body()
-                            } else null
-                        } catch (e: Exception) {
-                            null
+                val onlineUsersDeferred = async {
+                    try {
+                        val response = apiService.getOnlineUsers("agromo")
+                        if (response.isSuccessful) {
+                            response.body()?.let { apiResponse ->
+                                if (apiResponse.success) {
+                                    // Convert to list of OnlineUsersResponse
+                                    apiResponse.data.map { tenantData ->
+                                        OnlineUsersResponse(
+                                            tenant = tenantData.tenant,
+                                            count = tenantData.onlineUsers,
+                                            users = emptyList() // Swagger doesn't provide user list
+                                        )
+                                    }
+                                } else emptyList()
+                            } ?: emptyList()
+                        } else {
+                            emptyList()
                         }
+                    } catch (e: Exception) {
+                        emptyList()
                     }
                 }
 
-                // Get total online users
-                val totalOnlineDeferred = async {
-                    try {
-                        val response = apiService.getTotalOnlineUsers()
-                        if (response.isSuccessful) {
-                            response.body()?.total ?: 0
-                        } else 0
-                    } catch (e: Exception) {
-                        0
-                    }
-                }
+                // Calculate total online users from the fetched data
 
                 // Wait for all to complete and get results
                 val topUsers = topUsersDeferred.mapNotNull { it.await() }.ifEmpty {
@@ -90,22 +91,8 @@ class HomeViewModel(
                     }
                 }
                 val formMetrics = formMetricsDeferred.mapNotNull { it.await() }
-                val onlineUsers = onlineUsersDeferred.mapIndexedNotNull { index, deferred ->
-                    val body = deferred.await()
-                    if (body != null) {
-                        OnlineUsersResponse(
-                            tenant = tenants[index],
-                            count = body.count,
-                            users = body.users ?: emptyList()
-                        )
-                    } else null
-                }.ifEmpty {
-                    // Provide default empty data if no data returned
-                    tenants.map { tenant ->
-                        OnlineUsersResponse(tenant, 0, emptyList())
-                    }
-                }
-                val totalOnline = totalOnlineDeferred.await()
+                val onlineUsers = onlineUsersDeferred.await()
+                val totalOnline = onlineUsers.sumOf { it.count }
 
                 _uiState.value = HomeUiState.Success(
                     topUsers = topUsers,
