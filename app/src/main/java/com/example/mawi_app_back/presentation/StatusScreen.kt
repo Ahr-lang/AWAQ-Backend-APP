@@ -47,9 +47,9 @@ fun StatusScreen(viewModel: StatusViewModel) {
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Estado del sistema", fontWeight = FontWeight.SemiBold, fontSize = 22.sp, color = Ink)
+                Text("Estado del sistema", fontWeight = FontWeight.SemiBold, fontSize = 22.sp, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(6.dp))
-                Text("Últimas 24 horas por tenant", color = Subtle, fontSize = 14.sp)
+                Text("Últimas 24 horas por tenant", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
 
                 Spacer(Modifier.height(16.dp))
 
@@ -71,11 +71,11 @@ fun StatusScreen(viewModel: StatusViewModel) {
                     if (legendVisible) {
                         Spacer(Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            LegendDot(AwaqGreen); Text("  No errores", color = Subtle)
+                            LegendDot(AwaqGreen); Text("  No errores", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                             Spacer(Modifier.width(16.dp))
-                            LegendDot(Yellow);   Text("  Algunos errores", color = Subtle)
+                            LegendDot(Yellow);   Text("  Algunos errores", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                             Spacer(Modifier.width(16.dp))
-                            LegendDot(Red);      Text("  Solo errores", color = Subtle)
+                            LegendDot(Red);      Text("  Solo errores", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                         }
                     }
                     Spacer(Modifier.height(12.dp))
@@ -94,7 +94,7 @@ fun StatusScreen(viewModel: StatusViewModel) {
                         is StatusUiState.Success -> {
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 s.rows.forEach { row ->
-                                    AppStatusPanel(row, expandedApp == row.tenant, { expandedApp = if (expandedApp == row.tenant) null else row.tenant }, { errors -> selectedErrors = errors; showErrorsDialog = true }, Ink, AwaqGreen, Yellow, Red)
+                                    AppStatusPanel(row, expandedApp == row.tenant, { expandedApp = if (expandedApp == row.tenant) null else row.tenant }, { errors -> selectedErrors = errors; showErrorsDialog = true }, MaterialTheme.colorScheme.onBackground, AwaqGreen, Yellow, Red)
                                 }
                             }
                         }
@@ -114,7 +114,7 @@ fun StatusScreen(viewModel: StatusViewModel) {
                 LazyColumn {
                     if (selectedErrors.isEmpty()) {
                         item {
-                            Text("No hay errores en esta hora", color = Ink, fontSize = 14.sp)
+                            Text("No hay errores en esta hora", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
                         }
                     } else {
                         items(selectedErrors) { error ->
@@ -127,35 +127,35 @@ fun StatusScreen(viewModel: StatusViewModel) {
                                     text = error.operation,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp,
-                                    color = Ink
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Spacer(Modifier.height(4.dp))
                                 Text(
                                     text = "Mensaje: ${error.message}",
                                     fontSize = 12.sp,
-                                    color = Ink
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 error.statusCode?.let {
                                     Text(
                                         text = "Status: $it",
                                         fontSize = 12.sp,
-                                        color = Ink
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                 }
                                 Text(
                                     text = "Hora: ${error.timestamp}",
                                     fontSize = 11.sp,
-                                    color = Ink.copy(alpha = 0.7f)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 error.userId?.let {
                                     Text(
                                         text = "User ID: $it",
                                         fontSize = 11.sp,
-                                        color = Ink.copy(alpha = 0.7f)
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                                 Spacer(Modifier.height(8.dp))
-                                Divider(color = Ink.copy(alpha = 0.2f))
+                                Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
                             }
                         }
                     }
@@ -194,7 +194,7 @@ private fun AppStatusPanel(
             Text(appName, fontWeight = FontWeight.SemiBold, color = ink, modifier = Modifier.weight(1f))
             val chipColor = when (row.dailyStatus) { "green" -> green; "yellow" -> yellow; else -> red }
             Surface(color = chipColor.copy(alpha = .12f), shape = RoundedCornerShape(999.dp)) {
-                Text(row.dailyStatus.uppercase(), color = chipColor, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                Text(row.dailyStatus.uppercase(), color = chipColor, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
             }
             Icon(
                 imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
