@@ -11,7 +11,7 @@ class AuthRepository(
     private val tokenManager: TokenManager
 ) {
     suspend fun logIn(email: String, password: String) {
-        val response = apiService.logIn("agromo", LoginRequest(email, password))
+        val response = apiService.logIn("back", LoginRequest(email, password))
         if (response.isSuccessful && response.body() != null) {
             val token = response.body()!!.token
             tokenManager.saveToken(token)
@@ -21,7 +21,7 @@ class AuthRepository(
     }
 
     suspend fun register(username: String, user_email: String, password: String) {
-        val response = apiService.register("agromo", RegisterRequest(username, user_email, password))
+        val response = apiService.register("back", RegisterRequest(username, user_email, password))
         if (!response.isSuccessful) {
             // Maneja el error, por ejemplo, si el usuario ya existe
             throw Exception("El registro falló: ${response.message()}")
