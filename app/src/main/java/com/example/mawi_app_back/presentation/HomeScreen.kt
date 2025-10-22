@@ -64,7 +64,7 @@ fun HomeScreen(
 
                         Spacer(Modifier.height(16.dp))
 
-                        // Sección 2: Cantidad de Formularios por Usuarios
+                        // Sección 2: Top Formularios por Aplicacion
                         TopUsersSection(data.topUsers)
 
                         Spacer(Modifier.height(16.dp))
@@ -199,7 +199,7 @@ fun TopUsersSection(topUsers: List<TopUsersByFormTypeResponse>) {
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             // Header
             Text(
-                text = "Cantidad de Formularios por Usuarios",
+                text = "Top Formularios por Aplicacion",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 color = AwaqGreen,
