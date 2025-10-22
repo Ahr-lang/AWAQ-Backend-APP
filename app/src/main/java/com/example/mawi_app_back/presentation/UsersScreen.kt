@@ -39,23 +39,49 @@ fun UsersScreen(viewModel: UsersViewModel) {
         Spacer(modifier = Modifier.height(10.dp))
 
         // Tenant selector
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            tenants.forEach { tenant ->
-                Button(
-                    onClick = { viewModel.setTenant(tenant) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (tenant == viewModel.currentTenant)
-                            AwaqGreen
-                        else MaterialTheme.colorScheme.secondary,
-                        contentColor = if (tenant == viewModel.currentTenant)
-                            Color.White
-                        else MaterialTheme.colorScheme.onSecondary
-                    )
-                ) {
-                    Text(tenant, maxLines = 1)
+            // First row: back and agromo
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf("back", "agromo").forEach { tenant ->
+                    Button(
+                        onClick = { viewModel.setTenant(tenant) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (tenant == viewModel.currentTenant)
+                                AwaqGreen
+                            else MaterialTheme.colorScheme.secondary,
+                            contentColor = if (tenant == viewModel.currentTenant)
+                                Color.White
+                            else MaterialTheme.colorScheme.onSecondary
+                        )
+                    ) {
+                        Text(tenant, maxLines = 1)
+                    }
+                }
+            }
+            // Second row: biomo and robo
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf("biomo", "robo").forEach { tenant ->
+                    Button(
+                        onClick = { viewModel.setTenant(tenant) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (tenant == viewModel.currentTenant)
+                                AwaqGreen
+                            else MaterialTheme.colorScheme.secondary,
+                            contentColor = if (tenant == viewModel.currentTenant)
+                                Color.White
+                            else MaterialTheme.colorScheme.onSecondary
+                        )
+                    ) {
+                        Text(tenant, maxLines = 1)
+                    }
                 }
             }
         }

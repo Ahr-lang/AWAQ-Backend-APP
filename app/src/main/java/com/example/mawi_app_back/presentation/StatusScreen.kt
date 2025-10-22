@@ -71,11 +71,11 @@ fun StatusScreen(viewModel: StatusViewModel) {
                     if (legendVisible) {
                         Spacer(Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            LegendDot(AwaqGreen); Text("  No errores", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                            LegendDot(AwaqGreen); Text("  Correcto", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                             Spacer(Modifier.width(16.dp))
-                            LegendDot(Yellow);   Text("  Algunos errores", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                            LegendDot(Yellow);   Text("  Parcial", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                             Spacer(Modifier.width(16.dp))
-                            LegendDot(Red);      Text("  Solo errores", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                            LegendDot(Red);      Text("  Crítico", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                         }
                     }
                     Spacer(Modifier.height(12.dp))
