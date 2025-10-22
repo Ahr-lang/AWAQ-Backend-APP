@@ -13,6 +13,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.mawi_app_back.data.remote.models.UserDto
+import com.example.mawi_app_back.ui.theme.AwaqGreen
+
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @Composable
 fun UsersScreen(viewModel: UsersViewModel) {
@@ -20,6 +23,7 @@ fun UsersScreen(viewModel: UsersViewModel) {
     val tenants = viewModel.tenants
     var showDeleteDialog by remember { mutableStateOf(false) }
     var usernameToDelete by remember { mutableStateOf("") }
+    var showAddDialog by remember { mutableStateOf(false) }
 
     // Outer column no longer scrolls
     Column(
@@ -44,7 +48,7 @@ fun UsersScreen(viewModel: UsersViewModel) {
                     onClick = { viewModel.setTenant(tenant) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (tenant == viewModel.currentTenant)
-                            MaterialTheme.colorScheme.primary
+                            AwaqGreen
                         else MaterialTheme.colorScheme.secondary
                     )
                 ) {
@@ -52,6 +56,21 @@ fun UsersScreen(viewModel: UsersViewModel) {
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // boton para agregar usuario
+        Button(
+            onClick = { showAddDialog = true },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AwaqGreen,
+                contentColor = Color.White
+            ),
+            modifier = Modifier.fillMaxWidth(0.6f)
+        ) {
+            Text("Agregar Usuario")
+        }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -128,7 +147,65 @@ fun UsersScreen(viewModel: UsersViewModel) {
                 Text("Selecciona un tenant para ver usuarios.")
             }
         }
+
+        // Para agregar usuario
+        if (showAddDialog) {
+            AddUserDialog(
+                onDismiss = { showAddDialog = false },
+                onConfirm = { username, email, password ->
+                    viewModel.addUser(username, email, password)
+                    showAddDialog = false
+                }
+            )
+        }
     }
+}
+
+
+@Composable
+private fun AddUserDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (username: String, email: String, password: String) -> Unit
+) {
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Agregar usuario") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Usuario") },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Contraseña") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation()
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onConfirm(username.trim(), email.trim(), password) }) {
+                Text("Crear")
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) { Text("Cancelar") }
+        }
+    )
 }
 
 @Composable
