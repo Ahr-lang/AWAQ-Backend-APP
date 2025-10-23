@@ -1,5 +1,6 @@
 package com.example.mawi_app_back.presentation
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -206,112 +207,93 @@ fun ApplicationCard(
             if (isExpanded) {
                 Spacer(Modifier.height(16.dp))
                 
-                // Dos columnas: Izquierda (Formularios por usuario) y Derecha (Total por tipo)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                var showUsersForms by remember { mutableStateOf(false) }
+                var showFormTypes by remember { mutableStateOf(false) }
+                
+                // Sección desplegable: Formularios por Usuario
+                ExpandableSection(
+                    title = "Formularios por Usuario",
+                    isExpanded = showUsersForms,
+                    onToggle = { showUsersForms = !showUsersForms }
                 ) {
-                    // Columna Izquierda: Formularios por Usuario
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
+                    if (topUsers?.topUsers.isNullOrEmpty()) {
                         Text(
-                            text = "Formularios por Usuario",
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp,
-                            color = Color(0xFF666666),
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            text = "Sin datos",
+                            fontSize = 12.sp,
+                            color = Color(0xFF999999)
                         )
-                        
-                        if (topUsers?.topUsers.isNullOrEmpty()) {
-                            Text(
-                                text = "Sin datos",
-                                fontSize = 12.sp,
-                                color = Color(0xFF999999)
-                            )
-                        } else {
-                            topUsers?.topUsers?.take(5)?.forEach { user ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                    } else {
+                        topUsers?.topUsers?.forEach { user ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = user.user.username,
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF333333),
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Surface(
+                                    color = AwaqGreen,
+                                    shape = RoundedCornerShape(4.dp)
                                 ) {
                                     Text(
-                                        text = user.user.username,
-                                        fontSize = 12.sp,
-                                        color = Color(0xFF333333),
-                                        modifier = Modifier.weight(1f)
+                                        text = "${user.formCount}",
+                                        fontSize = 11.sp,
+                                        color = White,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                     )
-                                    Surface(
-                                        color = AwaqGreen,
-                                        shape = RoundedCornerShape(4.dp)
-                                    ) {
-                                        Text(
-                                            text = "${user.formCount}",
-                                            fontSize = 11.sp,
-                                            color = White,
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                        )
-                                    }
                                 }
                             }
                         }
                     }
-
-                    // Divisor vertical
-                    VerticalDivider(
-                        modifier = Modifier
-                            .height(120.dp)
-                            .width(1.dp),
-                        color = Color(0xFFE0E0E0)
-                    )
-
-                    // Columna Derecha: Total de Formas por Tipo
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
+                }
+                
+                Spacer(Modifier.height(12.dp))
+                
+                // Sección desplegable: Total por Tipo
+                ExpandableSection(
+                    title = "Total por Tipo",
+                    isExpanded = showFormTypes,
+                    onToggle = { showFormTypes = !showFormTypes }
+                ) {
+                    if (formMetrics?.metrics.isNullOrEmpty()) {
                         Text(
-                            text = "Total por Tipo",
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp,
-                            color = Color(0xFF666666),
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            text = "Sin datos",
+                            fontSize = 12.sp,
+                            color = Color(0xFF999999)
                         )
-                        
-                        if (formMetrics?.metrics.isNullOrEmpty()) {
-                            Text(
-                                text = "Sin datos",
-                                fontSize = 12.sp,
-                                color = Color(0xFF999999)
-                            )
-                        } else {
-                            formMetrics?.metrics?.forEach { metric ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                    } else {
+                        formMetrics?.metrics?.forEach { metric ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = metric.formType.replaceFirstChar { it.uppercase() },
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF333333),
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Surface(
+                                    color = AwaqGreen.copy(alpha = 0.7f),
+                                    shape = RoundedCornerShape(4.dp)
                                 ) {
                                     Text(
-                                        text = metric.formType.replaceFirstChar { it.uppercase() },
-                                        fontSize = 12.sp,
-                                        color = Color(0xFF333333),
-                                        modifier = Modifier.weight(1f)
+                                        text = "${metric.count}",
+                                        fontSize = 11.sp,
+                                        color = White,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                     )
-                                    Surface(
-                                        color = AwaqGreen.copy(alpha = 0.7f),
-                                        shape = RoundedCornerShape(4.dp)
-                                    ) {
-                                        Text(
-                                            text = "${metric.count}",
-                                            fontSize = 11.sp,
-                                            color = White,
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                        )
-                                    }
                                 }
                             }
                         }
@@ -323,6 +305,54 @@ fun ApplicationCard(
 }
 
 
+
+@Composable
+fun ExpandableSection(
+    title: String,
+    isExpanded: Boolean,
+    onToggle: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color(0xFFF8F9FA),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            // Header clickeable
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggle() },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp,
+                    color = Color(0xFF666666)
+                )
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = if (isExpanded) "Contraer" else "Expandir",
+                    tint = AwaqGreen,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            
+            // Contenido expandible
+            if (isExpanded) {
+                Spacer(Modifier.height(8.dp))
+                content()
+            }
+        }
+    }
+}
 
 @Composable
 fun OnlineUsersSection(onlineUsers: List<OnlineUsersResponse>, totalOnline: Int) {
