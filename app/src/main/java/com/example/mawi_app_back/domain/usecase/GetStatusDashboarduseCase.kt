@@ -26,8 +26,22 @@ class GetStatusDashboardUseCase(
     }
 
     private fun computeDailyStatus(hours: List<StatusPoint>): String {
-        if (hours.any { it.status == "red" }) return "red"
-        if (hours.any { it.status == "yellow" }) return "yellow"
+        val hasGreen = hours.any { it.status == "green" }
+        val hasRed = hours.any { it.status == "red" }
+        val hasYellow = hours.any { it.status == "yellow" }
+        
+        // If there's a mix of green and red (inconsistent), show yellow (warning)
+        if (hasGreen && hasRed) return "yellow"
+        
+        // If all are green, show green (good)
+        if (hasGreen && !hasRed && !hasYellow) return "green"
+        
+        // If all are red, show red (bad)
+        if (hasRed && !hasGreen) return "red"
+        
+        // If there's any yellow, show yellow
+        if (hasYellow) return "yellow"
+        
         return "green"
     }
 }

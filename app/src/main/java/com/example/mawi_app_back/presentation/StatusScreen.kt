@@ -1,18 +1,23 @@
 package com.example.mawi_app_back.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mawi_app_back.presentation.StatusPoint
@@ -298,23 +303,86 @@ fun ErrorDetailDialog(
         title = { 
             Text(
                 text = "Detalle del Error",
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
             ) 
         },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                DetailRow("Operación", error.operation)
-                DetailRow("Mensaje", error.message)
-                error.statusCode?.let { DetailRow("Status Code", it.toString()) }
-                DetailRow("Timestamp", error.timestamp)
-                error.userId?.let { DetailRow("User ID", it.toString()) }
+                // Error ID Card
+                InfoCard(title = "ID del Error") {
+                    Text(
+                        text = error.id,
+                        fontSize = 12.sp,
+                        color = Color(0xFF666666),
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+                
+                // Request Information
+                InfoCard(title = "Información de la Solicitud") {
+                    DetailRow("Operación", error.operation)
+                    error.method?.let { DetailRow("Método", it) }
+                    error.url?.let { DetailRow("URL", it) }
+                    error.statusCode?.let { 
+                        DetailRow(
+                            "Status Code", 
+                            it.toString(),
+                            valueColor = if (it >= 500) Color(0xFFDC2626) else Color(0xFFEA580C)
+                        )
+                    }
+                }
+                
+                // Error Details
+                InfoCard(title = "Detalles del Error") {
+                    DetailRow("Tipo", error.errorType.uppercase())
+                    DetailRow("Mensaje", error.message)
+                    DetailRow("Tenant", error.tenant.uppercase())
+                }
+                
+                // Timestamp
+                InfoCard(title = "Fecha y Hora") {
+                    val formattedTime = try {
+                        val instant = java.time.Instant.parse(error.timestamp)
+                        val formatter = java.time.format.DateTimeFormatter
+                            .ofPattern("dd/MM/yyyy HH:mm:ss")
+                            .withZone(java.time.ZoneId.of("UTC"))
+                        formatter.format(instant) + " UTC"
+                    } catch (e: Exception) {
+                        error.timestamp
+                    }
+                    DetailRow("Timestamp", formattedTime)
+                }
+                
+                // Context Information
+                error.context?.let { context ->
+                    if (context.isNotEmpty()) {
+                        InfoCard(title = "Contexto Adicional") {
+                            context.forEach { (key, value) ->
+                                if (value !is Map<*, *>) {
+                                    DetailRow(
+                                        key.replaceFirstChar { it.uppercase() },
+                                        value.toString()
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
-            Button(onClick = onDismiss) {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AwaqGreen
+                )
+            ) {
                 Text("Cerrar")
             }
         }
@@ -322,18 +390,60 @@ fun ErrorDetailDialog(
 }
 
 @Composable
-fun DetailRow(label: String, value: String) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+fun InfoCard(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color(0xFFF8F9FA),
+        shape = RoundedCornerShape(8.dp),
+        border = BorderStroke(1.dp, Color(0xFFE5E7EB))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                color = AwaqGreen
+            )
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = Color(0xFFE5E7EB)
+            )
+            content()
+        }
+    }
+}
+
+@Composable
+fun DetailRow(
+    label: String, 
+    value: String,
+    valueColor: Color = Color(0xFF111827),
+    maxLines: Int = Int.MAX_VALUE
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
         Text(
             text = label,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 12.sp,
-            color = Color(0xFF666666)
+            fontSize = 11.sp,
+            color = Color(0xFF6B7280)
         )
         Text(
             text = value,
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurface
+            fontSize = 13.sp,
+            color = valueColor,
+            maxLines = maxLines,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
