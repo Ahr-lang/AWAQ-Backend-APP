@@ -68,6 +68,7 @@ fun HomeScreen(
 
                         // Tarjetas clickeables de aplicaciones
                         ApplicationCardsSection(
+                            usersWithForms = data.usersWithForms,
                             topUsers = data.topUsers,
                             formMetrics = data.formMetrics
                         )
@@ -111,6 +112,7 @@ fun HomeScreen(
 
 @Composable
 fun ApplicationCardsSection(
+    usersWithForms: List<UsersWithFormsResponse>,
     topUsers: List<TopUsersByFormTypeResponse>,
     formMetrics: List<FormMetricsResponse>
 ) {
@@ -130,6 +132,7 @@ fun ApplicationCardsSection(
                 appName = appName,
                 isExpanded = expandedApp == appName,
                 onCardClick = { expandedApp = if (expandedApp == appName) null else appName },
+                usersWithForms = usersWithForms.find { it.tenant.equals(appName, ignoreCase = true) },
                 topUsers = topUsers.find { it.tenant.equals(appName, ignoreCase = true) },
                 formMetrics = formMetrics.find { it.tenant.equals(appName, ignoreCase = true) }
             )
@@ -142,6 +145,7 @@ fun ApplicationCard(
     appName: String,
     isExpanded: Boolean,
     onCardClick: () -> Unit,
+    usersWithForms: UsersWithFormsResponse?,
     topUsers: TopUsersByFormTypeResponse?,
     formMetrics: FormMetricsResponse?
 ) {
@@ -216,14 +220,14 @@ fun ApplicationCard(
                     isExpanded = showUsersForms,
                     onToggle = { showUsersForms = !showUsersForms }
                 ) {
-                    if (topUsers?.topUsers.isNullOrEmpty()) {
+                    if (usersWithForms?.users.isNullOrEmpty()) {
                         Text(
                             text = "Sin datos",
                             fontSize = 12.sp,
                             color = Color(0xFF999999)
                         )
                     } else {
-                        topUsers?.topUsers?.forEach { user ->
+                        usersWithForms?.users?.forEach { user ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -232,7 +236,7 @@ fun ApplicationCard(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = user.user.username,
+                                    text = user.username,
                                     fontSize = 12.sp,
                                     color = Color(0xFF333333),
                                     modifier = Modifier.weight(1f)
@@ -242,7 +246,7 @@ fun ApplicationCard(
                                     shape = RoundedCornerShape(4.dp)
                                 ) {
                                     Text(
-                                        text = "${user.formCount}",
+                                        text = "${user.forms_count}",
                                         fontSize = 11.sp,
                                         color = White,
                                         fontWeight = FontWeight.Bold,
