@@ -44,57 +44,50 @@ fun StatusScreen(viewModel: StatusViewModel) {
     Scaffold(containerColor = Color.Transparent) { inner ->
         AwaqBackground(modifier = Modifier.padding(inner)) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Estado del sistema", fontWeight = FontWeight.SemiBold, fontSize = 22.sp, color = MaterialTheme.colorScheme.onBackground)
-                Spacer(Modifier.height(6.dp))
-                Text("Últimas 24 horas por tenant", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+                // Título principal
+                Text(
+                    text = "Status del Sistema",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 28.sp,
+                    color = AwaqGreen,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
 
-                Spacer(Modifier.height(16.dp))
-
-                AwaqSimpleCard {
-                    // Toggleable Leyenda
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Leyenda", fontWeight = FontWeight.SemiBold, color = Ink)
-                        Spacer(Modifier.weight(1f))
-                        IconButton(onClick = { legendVisible = !legendVisible }) {
-                            Icon(
-                                imageVector = if (legendVisible) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                contentDescription = if (legendVisible) "Ocultar leyenda" else "Mostrar leyenda"
-                            )
-                        }
+                when (val s = uiState) {
+                    StatusUiState.Loading, StatusUiState.Idle -> {
+                        CircularProgressIndicator(color = AwaqGreen)
                     }
-                    if (legendVisible) {
-                        Spacer(Modifier.height(8.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            LegendDot(AwaqGreen); Text("  Correcto", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                            Spacer(Modifier.width(16.dp))
-                            LegendDot(Yellow);   Text("  Parcial", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                            Spacer(Modifier.width(16.dp))
-                            LegendDot(Red);      Text("  Crítico", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                        }
+                    is StatusUiState.Error -> {
+                        ErrorMessage(message = s.message)
                     }
-                    Spacer(Modifier.height(12.dp))
-                    HorizontalDivider(color = DividerSoft)
-                    Spacer(Modifier.height(12.dp))
-
-                    when (val s = uiState) {
-                        StatusUiState.Loading, StatusUiState.Idle -> {
-                            LoadingIndicator(
-                                modifier = Modifier.height(180.dp)
-                            )
-                        }
-                        is StatusUiState.Error -> {
-                            ErrorMessage(message = s.message)
-                        }
-                        is StatusUiState.Success -> {
-                            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                                s.rows.forEach { row ->
-                                    AppStatusPanel(row, expandedApp == row.tenant, { expandedApp = if (expandedApp == row.tenant) null else row.tenant }, { errors -> selectedErrors = errors; showErrorsDialog = true }, MaterialTheme.colorScheme.onBackground, AwaqGreen, Yellow, Red)
+                    is StatusUiState.Success -> {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // Orden específico: agromo, biomo, robo
+                            val orderedApps = listOf("agromo", "biomo", "robo")
+                            
+                            orderedApps.forEach { appName ->
+                                val row = s.rows.find { it.tenant.equals(appName, ignoreCase = true) }
+                                row?.let {
+                                    AppStatusCard(
+                                        row = it,
+                                        isExpanded = expandedApp == it.tenant,
+                                        onCardClick = { expandedApp = if (expandedApp == it.tenant) null else it.tenant },
+                                        onErrorClick = { error -> 
+                                            selectedErrors = listOf(error)
+                                            showErrorsDialog = true 
+                                        },
+                                        green = AwaqGreen,
+                                        yellow = Yellow,
+                                        red = Red
+                                    )
                                 }
                             }
                         }
@@ -106,66 +99,240 @@ fun StatusScreen(viewModel: StatusViewModel) {
         }
     }
 
-    if (showErrorsDialog) {
-        AlertDialog(
-            onDismissRequest = { showErrorsDialog = false },
-            title = { Text("Errores de la Hora") },
-            text = {
-                LazyColumn {
-                    if (selectedErrors.isEmpty()) {
-                        item {
-                            Text("No hay errores en esta hora", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
-                        }
-                    } else {
-                        items(selectedErrors) { error ->
-                            Column(
+    // Diálogo de detalle de error
+    if (showErrorsDialog && selectedErrors.isNotEmpty()) {
+        ErrorDetailDialog(
+            error = selectedErrors.first(),
+            onDismiss = { showErrorsDialog = false }
+        )
+    }
+}
+
+@Composable
+fun AppStatusCard(
+    row: TenantStatusRow,
+    isExpanded: Boolean,
+    onCardClick: () -> Unit,
+    onErrorClick: (ErrorItem) -> Unit,
+    green: Color,
+    yellow: Color,
+    red: Color
+) {
+    val appName = row.tenant.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+    
+    // Determinar el color del status y el texto del estado
+    val statusColor = when (row.dailyStatus) {
+        "green" -> green
+        "yellow" -> yellow
+        else -> red
+    }
+    
+    val statusText = when (row.dailyStatus) {
+        "green" -> "OK"
+        "yellow" -> "Degradado"
+        else -> "Crítico"
+    }
+    
+    // Calcular el total de errores en 24 horas
+    val totalErrors = row.hours.sumOf { it.errors }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onCardClick,
+        colors = CardDefaults.cardColors(
+            containerColor = if (isExpanded) statusColor.copy(alpha = 0.05f) else MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Header de la tarjeta
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Indicador tipo semáforo (círculo)
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(statusColor)
+                    )
+                    
+                    Text(
+                        text = appName.uppercase(),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = statusColor
+                    )
+                    
+                    Text(
+                        text = "|",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = Color(0xFF999999)
+                    )
+                    
+                    Text(
+                        text = "$totalErrors errores",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = Color(0xFF666666)
+                    )
+                }
+                
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = if (isExpanded) "Contraer" else "Expandir",
+                    tint = statusColor
+                )
+            }
+
+            // Contenido expandido
+            if (isExpanded) {
+                Spacer(Modifier.height(16.dp))
+                
+                // Estado actual de la app
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = statusColor.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Estado: $statusText",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
+                        color = statusColor,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+                
+                Spacer(Modifier.height(12.dp))
+                
+                // Listado de errores recientes
+                Text(
+                    text = "Errores Recientes",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp,
+                    color = Color(0xFF666666),
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                if (row.errors.isEmpty()) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color(0xFFF8F9FA),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "No hay errores registrados",
+                            fontSize = 12.sp,
+                            color = Color(0xFF999999),
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+                } else {
+                    // Mostrar hasta 5 errores más recientes
+                    row.errors.take(5).forEach { error ->
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp)
+                                .clickable { onErrorClick(error) },
+                            color = Color(0xFFF8F9FA),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = error.operation,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    text = "Mensaje: ${error.message}",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                error.statusCode?.let {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Status: $it",
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        text = error.operation,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 13.sp,
+                                        color = Color(0xFF333333)
                                     )
-                                }
-                                Text(
-                                    text = "Hora: ${error.timestamp}",
-                                    fontSize = 11.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                error.userId?.let {
                                     Text(
-                                        text = "User ID: $it",
+                                        text = error.message,
                                         fontSize = 11.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = Color(0xFF666666),
+                                        maxLines = 1
                                     )
                                 }
-                                Spacer(Modifier.height(8.dp))
-                                Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                                Icon(
+                                    imageVector = androidx.compose.material.icons.Icons.Default.ChevronRight,
+                                    contentDescription = "Ver detalle",
+                                    tint = Color(0xFF999999),
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         }
                     }
                 }
-            },
-            confirmButton = {
-                Button(onClick = { showErrorsDialog = false }) {
-                    Text("Cerrar")
-                }
             }
+        }
+    }
+}
+
+@Composable
+fun ErrorDetailDialog(
+    error: ErrorItem,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { 
+            Text(
+                text = "Detalle del Error",
+                fontWeight = FontWeight.Bold
+            ) 
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                DetailRow("Operación", error.operation)
+                DetailRow("Mensaje", error.message)
+                error.statusCode?.let { DetailRow("Status Code", it.toString()) }
+                DetailRow("Timestamp", error.timestamp)
+                error.userId?.let { DetailRow("User ID", it.toString()) }
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("Cerrar")
+            }
+        }
+    )
+}
+
+@Composable
+fun DetailRow(label: String, value: String) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = label,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 12.sp,
+            color = Color(0xFF666666)
+        )
+        Text(
+            text = value,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
