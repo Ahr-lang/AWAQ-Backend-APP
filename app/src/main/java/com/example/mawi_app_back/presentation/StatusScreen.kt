@@ -21,6 +21,7 @@ import com.example.mawi_app_back.presentation.ErrorItem
 import com.example.mawi_app_back.presentation.components.*
 import com.example.mawi_app_back.ui.theme.AwaqGreen
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 
