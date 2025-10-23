@@ -165,12 +165,33 @@ fun ApplicationCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = appName.uppercase(),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = AwaqGreen
-                )
+                // Calcular el total de formularios
+                val totalForms = formMetrics?.metrics?.sumOf { it.count } ?: 0
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = appName.uppercase(),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = AwaqGreen
+                    )
+                    Text(
+                        text = "|",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = Color(0xFF999999)
+                    )
+                    Text(
+                        text = "$totalForms",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = Color(0xFF666666)
+                    )
+                }
+                
                 Icon(
                     imageVector = if (isExpanded) 
                         Icons.Default.ExpandLess 
