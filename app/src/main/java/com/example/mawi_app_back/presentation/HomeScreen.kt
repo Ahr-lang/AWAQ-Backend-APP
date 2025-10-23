@@ -5,6 +5,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,10 +43,13 @@ fun HomeScreen(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Header
-                AwaqHeader(
-                    title = "Dashboard Administrativo",
-                    subtitle = "Monitorea la actividad de tus aplicaciones"
+                // Header - Título Grande
+                Text(
+                    text = "Formularios Total",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 28.sp,
+                    color = AwaqGreen,
+                    modifier = Modifier.padding(vertical = 16.dp)
                 )
 
                 when (uiState) {
@@ -59,17 +65,24 @@ fun HomeScreen(
                     is HomeUiState.Success -> {
                         val data = uiState as HomeUiState.Success
 
-                        // Sección 1: Usuarios con Formularios
-                        UsersWithFormsSection(data.usersWithForms)
+                        // Tarjetas clickeables de aplicaciones
+                        ApplicationCardsSection(
+                            topUsers = data.topUsers,
+                            formMetrics = data.formMetrics
+                        )
 
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(24.dp))
 
-                        // Sección 2: Top Formularios por Aplicacion
-                        TopUsersSection(data.topUsers)
+                        // Separador visual
+                        HorizontalDivider(
+                            thickness = 2.dp,
+                            color = AwaqGreen.copy(alpha = 0.3f),
+                            modifier = Modifier.padding(horizontal = 32.dp)
+                        )
 
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(24.dp))
 
-                        // Sección 3: Usuarios en Línea
+                        // Sección de Usuarios en Línea (sin cambios)
                         OnlineUsersSection(data.onlineUsers, data.totalOnline)
                     }
                     HomeUiState.Idle -> {
@@ -96,230 +109,199 @@ fun HomeScreen(
 }
 
 @Composable
-fun UsersWithFormsSection(usersWithForms: List<UsersWithFormsResponse>) {
-    AwaqCard {
-        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            // Header
-            Text(
-                text = "Usuarios con Formularios",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                color = AwaqGreen,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+fun ApplicationCardsSection(
+    topUsers: List<TopUsersByFormTypeResponse>,
+    formMetrics: List<FormMetricsResponse>
+) {
+    var expandedApp by remember { mutableStateOf<String?>(null) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Filtrar solo las apps principales
+        val apps = listOf("biomo", "agromo", "robo")
+        
+        apps.forEach { appName ->
+            ApplicationCard(
+                appName = appName,
+                isExpanded = expandedApp == appName,
+                onCardClick = { expandedApp = if (expandedApp == appName) null else appName },
+                topUsers = topUsers.find { it.tenant.equals(appName, ignoreCase = true) },
+                formMetrics = formMetrics.find { it.tenant.equals(appName, ignoreCase = true) }
             )
-
-            Spacer(Modifier.height(16.dp))
-
-            // Contenido
-            usersWithForms.forEach { tenantData ->
-                // Header del tenant
-                Text(
-                    text = tenantData.tenant.uppercase(),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color(0xFF666666),
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-
-                if (tenantData.users.isEmpty()) {
-                    // No hay usuarios
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        color = Color(0xFFF8F9FA),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = "Sin usuarios registrados",
-                            fontSize = 14.sp,
-                            color = Color(0xFF999999),
-                            modifier = Modifier.padding(16.dp),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
-                    }
-                } else {
-                    // Mostrar usuarios
-                    tenantData.users.forEach { user ->
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 2.dp),
-                            color = Color(0xFFF8F9FA),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = user.username,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 14.sp,
-                                        color = Color(0xFF333333)
-                                    )
-                                    Text(
-                                        text = user.user_email,
-                                        fontSize = 12.sp,
-                                        color = Color(0xFF666666)
-                                    )
-                                }
-                                Surface(
-                                    color = AwaqGreen,
-                                    shape = RoundedCornerShape(6.dp)
-                                ) {
-                                    Text(
-                                        text = "${user.forms_count}",
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        color = White,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Spacer(Modifier.height(12.dp))
-            }
         }
     }
 }
 
 @Composable
-fun TopUsersSection(topUsers: List<TopUsersByFormTypeResponse>) {
-    var showAll by remember { mutableStateOf(false) }
-
-    AwaqCard {
-        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            // Header
-            Text(
-                text = "Top Formularios por Aplicacion",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                color = AwaqGreen,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            // Contenido
-            topUsers.forEach { tenantData ->
-                // Header del tenant
+fun ApplicationCard(
+    appName: String,
+    isExpanded: Boolean,
+    onCardClick: () -> Unit,
+    topUsers: TopUsersByFormTypeResponse?,
+    formMetrics: FormMetricsResponse?
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(),
+        onClick = onCardClick,
+        colors = CardDefaults.cardColors(
+            containerColor = if (isExpanded) AwaqGreen.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Header de la tarjeta
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = tenantData.tenant.uppercase(),
+                    text = appName.uppercase(),
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color(0xFF666666),
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    fontSize = 20.sp,
+                    color = AwaqGreen
                 )
+                Icon(
+                    imageVector = if (isExpanded) 
+                        Icons.Default.ExpandLess 
+                    else 
+                        Icons.Default.ExpandMore,
+                    contentDescription = if (isExpanded) "Contraer" else "Expandir",
+                    tint = AwaqGreen
+                )
+            }
 
-                if (tenantData.topUsers.isEmpty()) {
-                    // No hay formularios
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        color = Color(0xFFF8F9FA),
-                        shape = RoundedCornerShape(8.dp)
+            // Contenido expandido
+            if (isExpanded) {
+                Spacer(Modifier.height(16.dp))
+                
+                // Dos columnas: Izquierda (Formularios por usuario) y Derecha (Total por tipo)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Columna Izquierda: Formularios por Usuario
+                    Column(
+                        modifier = Modifier.weight(1f)
                     ) {
                         Text(
-                            text = "Sin formularios registrados",
+                            text = "Formularios por Usuario",
+                            fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp,
-                            color = Color(0xFF999999),
-                            modifier = Modifier.padding(16.dp),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            color = Color(0xFF666666),
+                            modifier = Modifier.padding(bottom = 8.dp)
                         )
-                    }
-                } else {
-                    // Mostrar formularios
-                    val displayUsers = if (showAll) tenantData.topUsers else tenantData.topUsers.take(3)
-
-                    displayUsers.forEach { topUser ->
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 2.dp),
-                            color = Color(0xFFF8F9FA),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = topUser.formType.replaceFirstChar { it.uppercase() },
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 14.sp,
-                                        color = Color(0xFF333333)
-                                    )
-                                    Text(
-                                        text = topUser.user.username,
-                                        fontSize = 12.sp,
-                                        color = Color(0xFF666666)
-                                    )
-                                }
-                                Surface(
-                                    color = AwaqGreen,
-                                    shape = RoundedCornerShape(6.dp)
+                        
+                        if (topUsers?.topUsers.isNullOrEmpty()) {
+                            Text(
+                                text = "Sin datos",
+                                fontSize = 12.sp,
+                                color = Color(0xFF999999)
+                            )
+                        } else {
+                            topUsers?.topUsers?.take(5)?.forEach { user ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = "${topUser.formCount}",
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        color = White,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp
+                                        text = user.user.username,
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF333333),
+                                        modifier = Modifier.weight(1f)
                                     )
+                                    Surface(
+                                        color = AwaqGreen,
+                                        shape = RoundedCornerShape(4.dp)
+                                    ) {
+                                        Text(
+                                            text = "${user.formCount}",
+                                            fontSize = 11.sp,
+                                            color = White,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
 
-                    // Botón Show All si hay más de 3 formularios
-                    if (tenantData.topUsers.size > 3 && !showAll) {
-                        Spacer(Modifier.height(8.dp))
-                        TextButton(
-                            onClick = { showAll = true },
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        ) {
-                            Text(
-                                text = "Show All (${tenantData.topUsers.size})",
-                                color = AwaqGreen,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
+                    // Divisor vertical
+                    VerticalDivider(
+                        modifier = Modifier
+                            .height(120.dp)
+                            .width(1.dp),
+                        color = Color(0xFFE0E0E0)
+                    )
 
-                    // Botón Show Less cuando está expandido
-                    if (showAll && tenantData.topUsers.size > 3) {
-                        Spacer(Modifier.height(8.dp))
-                        TextButton(
-                            onClick = { showAll = false },
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        ) {
+                    // Columna Derecha: Total de Formas por Tipo
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "Total por Tipo",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            color = Color(0xFF666666),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        
+                        if (formMetrics?.metrics.isNullOrEmpty()) {
                             Text(
-                                text = "Show Less",
-                                color = AwaqGreen,
-                                fontWeight = FontWeight.Medium
+                                text = "Sin datos",
+                                fontSize = 12.sp,
+                                color = Color(0xFF999999)
                             )
+                        } else {
+                            formMetrics?.metrics?.forEach { metric ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = metric.formType.replaceFirstChar { it.uppercase() },
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF333333),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Surface(
+                                        color = AwaqGreen.copy(alpha = 0.7f),
+                                        shape = RoundedCornerShape(4.dp)
+                                    ) {
+                                        Text(
+                                            text = "${metric.count}",
+                                            fontSize = 11.sp,
+                                            color = White,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-
-                Spacer(Modifier.height(12.dp))
             }
         }
     }
 }
+
+
 
 @Composable
 fun OnlineUsersSection(onlineUsers: List<OnlineUsersResponse>, totalOnline: Int) {
