@@ -20,7 +20,9 @@ class GetStatusDashboardUseCase(
         return tenants.map { tenant ->
             val hours = repo.getTenantStatus(tenant)
             val daily = computeDailyStatus(hours)
-            val errors = repo.getTenantErrors(tenant).flatMap { it.recentErrors }
+            val allErrors = repo.getTenantErrors(tenant).flatMap { it.recentErrors }
+            // Filter errors to only show those matching the current tenant
+            val errors = allErrors.filter { it.tenant.equals(tenant, ignoreCase = true) }
             TenantStatusRow(tenant = tenant, hours = hours, dailyStatus = daily, errors = errors)
         }
     }
