@@ -356,68 +356,119 @@ fun ExpandableSection(
 
 @Composable
 fun OnlineUsersSection(onlineUsers: List<OnlineUsersResponse>, totalOnline: Int) {
-    AwaqCard {
-        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            // Header
-            Text(
-                text = "Usuarios en Línea",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                color = AwaqGreen,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            // Total global
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = AwaqGreen.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(12.dp)
+    var isExpanded by remember { mutableStateOf(false) }
+    
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        // Título de la sección
+        Text(
+            text = "Online Total",
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp,
+            color = AwaqGreen,
+            modifier = Modifier.padding(vertical = 12.dp)
+        )
+        
+        // Tarjeta clickeable con el total
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { isExpanded = !isExpanded },
+            colors = CardDefaults.cardColors(
+                containerColor = if (isExpanded) AwaqGreen.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface
+            ),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                Text(
-                    text = "Total Users: $totalOnline",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = AwaqGreen,
-                    modifier = Modifier.padding(16.dp),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            // Separator
-            Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
-
-            Spacer(Modifier.height(12.dp))
-
-            // Lista por tenant
-            onlineUsers.forEach { tenantData ->
+                // Header de la tarjeta
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "${tenantData.tenant?.replaceFirstChar { it.uppercase() } ?: "Unknown"} Users:",
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp,
-                        color = Color(0xFF333333)
-                    )
-                    Surface(
-                        color = AwaqGreen,
-                        shape = RoundedCornerShape(8.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "${tenantData.count}",
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            color = White,
+                            text = "USUARIOS EN LÍNEA",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
+                            fontSize = 18.sp,
+                            color = AwaqGreen
                         )
+                        Text(
+                            text = "|",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = Color(0xFF999999)
+                        )
+                        Text(
+                            text = "$totalOnline",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = Color(0xFF666666)
+                        )
+                    }
+                    
+                    Icon(
+                        imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = if (isExpanded) "Contraer" else "Expandir",
+                        tint = AwaqGreen
+                    )
+                }
+
+                // Contenido expandido - Desglose por tenant
+                if (isExpanded) {
+                    Spacer(Modifier.height(16.dp))
+                    
+                    // Filtrar y ordenar tenants principales
+                    val apps = listOf("robo", "agromo", "biomo")
+                    
+                    apps.forEach { appName ->
+                        val tenantData = onlineUsers.find { it.tenant.equals(appName, ignoreCase = true) }
+                        val count = tenantData?.count ?: 0
+                        
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            color = Color(0xFFF8F9FA),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = appName.replaceFirstChar { it.uppercase() },
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 16.sp,
+                                    color = Color(0xFF333333)
+                                )
+                                Surface(
+                                    color = AwaqGreen,
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = "$count",
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                        color = White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
